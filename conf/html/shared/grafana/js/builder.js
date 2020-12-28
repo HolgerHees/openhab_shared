@@ -526,7 +526,8 @@ function GrafanaBuilder(panelConfigs)
     
     function getFromItem()
     {
-        return "Chart_From";
+        console.log(resolveParam({}, "fromItem"));
+        return resolveParam({}, "fromItem");
     }
 
     function getTimerange(value)
