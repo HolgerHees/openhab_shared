@@ -29,7 +29,6 @@ class SemanticItem:
 
         self.children = []
         self.parents = []
-        self.root_path = []
         
     def getItem(self):
         return self.item
@@ -52,9 +51,6 @@ class SemanticItem:
     def getParents(self):
         return self.parents
 
-    def getRootPath(self):
-        return self.root_path
-      
     def __repr__(self):
         return self.item.getName() + " (" + str(self.label) + "|" + str(self.tags) + "|" + str(self.synonyms) + ")"
 
@@ -125,10 +121,6 @@ class SemanticModel:
             for semantic_children in semantic_item.children:
                 semantic_children.parents.append(semantic_item)
 
-        # prepare root path
-        for semantic_item in self.semantic_items.values():
-            semantic_item.root_path = set(self.buildPathParents(semantic_item,[]))
-
         # prepare regex matcher
         self.semantic_search_part_regex = {}
         self.semantic_search_full_regex = {}
@@ -140,45 +132,6 @@ class SemanticModel:
                 self.semantic_search_full_regex[search_term] = re.compile(config["main"]["phrase_full_matcher"].format(search_term))
                 
                 
-        search_terms = {}
-        for semantic_item in self.semantic_items.values():
-            semantic_type = semantic_item.getSemanticType()
-            if semantic_type not in search_terms:
-                search_terms[semantic_type] = {}
-            for search_term in semantic_item.getSearchTerms():
-                if search_term not in search_terms[semantic_type]:
-                    search_terms[semantic_type][search_term] = []
-                search_terms[semantic_type][search_term].append(semantic_item)
-                
-        # build search term maps for items with shared search terms
-        # e.g. flur unten <=> wohnzimmer stehlampe unten
-        self.children_search_map = {"Location": {},"Equipment": {}, "Point": {}}
-        self.buildDuplicateSearchMap(search_terms,"Location","Equipment")
-        self.buildDuplicateSearchMap(search_terms,"Location","Point")
-        self.buildDuplicateSearchMap(search_terms,"Equipment","Point")
-
-    def buildPathParents(self,semantic_item,parents=[]):
-        parents.append(semantic_item)
-        for parent in semantic_item.getParents():
-            if parent in parents or parent.getSemanticType() == "Group":
-                continue
-            self.buildPathParents(parent,parents)
-        return parents
-      
-    def buildDuplicateSearchMap(self,search_terms,semantic_parent_type,semantic_child_type):
-        duplicate_search_terms = set(search_terms[semantic_parent_type].keys()) & set(search_terms[semantic_child_type].keys())
-        for search_term in duplicate_search_terms:
-            equipment_parents = []
-            for semantic_equipment in search_terms[semantic_child_type][search_term]:
-                for path_item in semantic_equipment.getRootPath():
-                    if path_item.getSemanticType() != semantic_parent_type:
-                        continue
-                    if search_term not in self.children_search_map[semantic_parent_type]:
-                        self.children_search_map[semantic_parent_type][search_term] = []
-                    self.children_search_map[semantic_parent_type][search_term].append(path_item)
-        for search_term in self.children_search_map[semantic_parent_type]:
-            self.children_search_map[semantic_parent_type][search_term] = set(self.children_search_map[semantic_parent_type][search_term])
-            
     def getSemanticItem(self,item_name):
         return self.semantic_items[item_name]
     
@@ -190,6 +143,3 @@ class SemanticModel:
       
     def getRootLocations(self):
         return self.root_locations
-      
-    def getAlternativeChildrenPathMap(self,semantic_type):
-        return self.children_search_map[semantic_type]
