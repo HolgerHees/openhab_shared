@@ -8,7 +8,7 @@ Cases = {
         { "phrase": u"licht wohnzimmer automower und licht flur schlafzimmer und schuppen an", "items": [[None],[None],[ "Light_FF_Livingroom_Couch", "ACTION_ON" ],[ "Light_FF_Livingroom_Diningtable", "ACTION_ON" ],[ "Light_FF_Floor_Ceiling", "ACTION_ON" ],[ "Light_SF_Bedroom_Ceiling", "ACTION_ON" ],[ "Light_Outdoor_Garage_Gardenside_Manual", "ACTION_ON" ]] }
     ],
     "enabled1": [
-        { "phrase": u"licht im wohnzimmer und aussen licht und steckdosen aus", "items": [["pGF_Livingroom_Light_Diningtable_Brightness","OFF"],["pGF_Livingroom_Light_Hue4_Color","OFF"],["pGF_Livingroom_Light_Hue5_Color","OFF"],["pGF_Livingroom_Light_Hue1_Color","OFF"],["pGF_Livingroom_Light_Hue2_Color","OFF"],["pGF_Livingroom_Light_Hue3_Color","OFF"],["pGF_Livingroom_Light_Couchtable_Brightness","OFF"],["pOutdoor_Streedside_Garage_Light_Powered","OFF"],["pOutdoor_Streedside_Frontdoor_Light_Powered","OFF"],["pOutdoor_Carport_Light_Powered","OFF"],["pOutdoor_Garden_Garage_Light_Powered","OFF"],["pOutdoor_Garden_Terrace_Light_Brightness","OFF"],["pOutdoor_Streeside_Socket_Powered","OFF"],["pOutdoor_Garden_Terrace_Socket_Powered","OFF"]] },
+        { "phrase": u"licht dachboden an", "items": [["pFF_Attic_Light_Ceiling_Powered","ON"]] },
     ],
     "enabled": [
         # **** ERDGESCHOSS incl. Schuppen ****

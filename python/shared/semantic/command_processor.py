@@ -84,7 +84,7 @@ class CommandProcessor:
                     result = result + self.getItemsByType(semantic_item,type)
         return result
 
-    def _searchItems(self,semantic_item,unprocessed_search,items_to_skip,only_same_type,_full_matched_terms,_part_matched_terms,_processed_items):
+    def _searchItems(self,semantic_item,unprocessed_search,items_to_skip,location_search,_full_matched_terms,_part_matched_terms,_processed_items):
 
         matches = []
 
@@ -116,7 +116,7 @@ class CommandProcessor:
             full_matched_terms = part_matched_terms = total_matched_terms = new_matched_terms = []
             is_match = False
 
-        if only_same_type:
+        if location_search:
             # clean unprocessed search terms    
             for search_term in new_matched_terms:
                 unprocessed_search = unprocessed_search.replace(search_term,"")
@@ -125,10 +125,10 @@ class CommandProcessor:
         if semantic_item.getItem().getType() == "Group":
             for _item in semantic_item.getItem().getMembers():
                 _semantic_item = self.semantic_model.getSemanticItem(_item.getName())
-                if only_same_type and _semantic_item.getSemanticType() != semantic_item.getSemanticType():
+                if location_search and _semantic_item.getSemanticType() != semantic_item.getSemanticType():
                     continue
-                matches += self._searchItems(_semantic_item,unprocessed_search,items_to_skip,only_same_type,full_matched_terms,part_matched_terms,_processed_items)
-
+                matches += self._searchItems(_semantic_item,unprocessed_search,items_to_skip,location_search,full_matched_terms,part_matched_terms,_processed_items)
+                
         # add own match only if there are no sub matches
         if is_match and len(matches) == 0:
             matches.append(ItemMatcher(semantic_item,list(set(full_matched_terms)),list(set(part_matched_terms))))
@@ -139,7 +139,7 @@ class CommandProcessor:
         for action in actions:
             matches = []
             for semantic_location in self.semantic_model.getRootLocations():
-                matches += self._searchItems(semantic_location,action.unprocessed_search,items_to_skip=[],only_same_type=True,_full_matched_terms=[],_part_matched_terms=[],_processed_items=[])
+                matches += self._searchItems(semantic_location,action.unprocessed_search,items_to_skip=[],location_search=True,_full_matched_terms=[],_part_matched_terms=[],_processed_items=[])
             action.location_matches = matches
 
     def fillLocationsFallbacks(self,actions,fallback_location_name):
@@ -180,61 +180,57 @@ class CommandProcessor:
                 self.log.info(u"  location: '{}' => '{}'".format(location_match.semantic_item.getItem().getName(),location_match.all_matches))
             
             equipments = self.getItemsByType(location_match.semantic_item,"Equipment")
-            
             for equipment in equipments:
-                matches = self._searchItems(equipment,_unprocessed_search,items_to_skip=items_to_skip,only_same_type=False,_full_matched_terms=[],_part_matched_terms=[],_processed_items=[])
-                
+
+                matches = self._searchItems(equipment,_unprocessed_search,items_to_skip=items_to_skip,location_search=False,_full_matched_terms=[],_part_matched_terms=[],_processed_items=[])
                 for match in matches:
-                    key = u"{},{}".format(u",".join(location_match.all_matches),u",".join(match.all_matches))
-                    
                     if self.debug:
                         self.log.info(u"      item: '{}' => '{}'".format(match.semantic_item.getItem().getName(),match.all_matches))
 
+                    key = u"{},{}".format(u",".join(location_match.all_matches),u",".join(match.all_matches))
                     if key not in results:
                         results[key] = [location_match.getPriority() + match.getPriority(),match.all_matches, []]
-                        
+
                     if match.semantic_item.getSemanticType() == "Equipment":
                         results[key][2] += self.getItemsByType(match.semantic_item,"Point")
                     else:
                         results[key][2].append(match.semantic_item)
-                    #results[key][2].append(match.semantic_item)
                     
+        # check which result combination (location/equipment/property) has the highest priority
         final_priority = 0
-        final_matched_items = []
-        final_matched_search = []
         final_key = None
+        action.points = []
+        action.point_search_terms = []
         for key in results:
             match = results[key]
             #self.log.info(u"{} {}".format(key,match))
             
+            if match[0] < final_priority:
+                continue
+            
             if match[0] == final_priority:
                 if key != final_key:
-                    if len(key) > len(final_key):
-                        final_key = key
-                        final_priority = match[0]
-                        final_matched_search = match[1]
-                        final_matched_items = match[2]
+                    if len(key) <= len(final_key):
+                        continue
                 else:
-                    final_matched_items += match[2]
-            elif match[0] > final_priority:
-                final_key = key
-                final_priority = match[0]
-                final_matched_search = match[1]
-                final_matched_items = match[2]
+                    action.points += match[2]
+                    continue
+
+            final_key = key
+            final_priority = match[0]
+            action.point_search_terms = match[1]
+            action.points = match[2]
                 
         if final_key is not None:
             for search in final_key.split(","):
                 unprocessed_search = unprocessed_search.replace(search,"")
         
-        return final_matched_items, final_matched_search, unprocessed_search
+        action.unprocessed_search = unprocessed_search
  
     def detectPoints(self,actions):
         for action in actions:
             # search for points based on voice_cmd
-            matched_points, matched_search, unprocessed_search = self.checkPoints(action,action.unprocessed_search,[])
-            action.points = matched_points
-            action.point_search_terms = matched_search
-            action.unprocessed_search = unprocessed_search
+            self.checkPoints(action,action.unprocessed_search,[])
 
     def fillPointFallbacks(self,actions):
         # Fill missing points backward until command is found
@@ -245,11 +241,7 @@ class CommandProcessor:
  
             if len(action.points) == 0:
                 if last_action != None:
-                    matched_points, matched_search, unprocessed_search = self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
-                    action.points = matched_points
-                    action.point_search_terms = matched_search
-                    action.unprocessed_search = unprocessed_search
-                    #self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
+                    self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
             else:
                 last_action = action
  
@@ -259,11 +251,7 @@ class CommandProcessor:
             # if no points where found search again based on the last cmd with points
             if len(action.points) == 0:
                 if last_action != None:
-                    matched_points, matched_search, unprocessed_search = self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
-                    action.points = matched_points
-                    action.point_search_terms = matched_search
-                    action.unprocessed_search = unprocessed_search
-                    #self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
+                    self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
             else:
                 last_action = action
 
