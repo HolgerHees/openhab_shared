@@ -10,7 +10,8 @@ from org.openhab.core.automation import Rule as SmarthomeRule
 from org.eclipse.smarthome.core.types import UnDefType
 
 from org.eclipse.smarthome.model.persistence.extensions import PersistenceExtensions
-from org.eclipse.smarthome.core.thing import ChannelUID
+from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
+
 from org.joda.time import DateTime
 
 from core.actions import Telegram #, XMPP
@@ -270,6 +271,12 @@ def getGroupMemberChangeTrigger(itemOrName, state=None, triggerName=None):
 
 
 # *** Item getter ***
+def getThing(name):
+    item = things.get(ThingUID(name))
+    if item is None:
+        raise NotInitialisedException(u"Thing {} not found".format(name))
+    return item
+
 def getChannel(name):
     item = things.getChannel(ChannelUID(name))
     if item is None:
