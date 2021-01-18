@@ -254,13 +254,12 @@ def getGroupMember(itemOrName):
     return _walkRecursive(_getItem(itemOrName))
 
 
-#def getGroupMemberUpdateTrigger(itemOrName, state=None, triggerName=None):
-#    triggers = []
-#    items = _walkRecursive(getItem(itemOrName))
-#    for item in items:
-#        triggers.append(ItemStateUpdateTrigger(item.getName(), state, triggerName))
-#    return triggers
-
+def getGroupMemberUpdateTrigger(itemOrName, state=None, triggerName=None):
+    triggers = []
+    items = getGroupMember(getItem(itemOrName))
+    for item in items:
+        triggers.append(ItemStateUpdateTrigger(item.getName(), state, triggerName))
+    return triggers
 
 def getGroupMemberChangeTrigger(itemOrName, state=None, triggerName=None):
     triggers = []
