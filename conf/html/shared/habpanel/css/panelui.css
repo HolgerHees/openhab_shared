@@ -57,22 +57,11 @@
     width: 30%;
 }
 
-.mvWidget .weatherDetailForecast .hour > div > .info > .sunshineDuration {
-    white-space: nowrap;
-}
-
 .mvWidget .weatherDetailForecast .hour > div > .info > div > div:nth-child(2) {
     padding-left: 5px;
 }
 .mvWidget .weatherDetailForecast .week .hour .status {
     margin-left: 2%;
-}
-
-.mvWidget .weatherDetailForecast .week .hour .temperature .pre,
-.mvWidget .weatherDetailForecast .week .hour .temperature .main {
-    height: auto;
-    text-align: right;
-    line-height: 25px;
 }
 
 .mvWidget .weatherDetailForecast .mvClickable, .weatherDetailForecast .today .hour > div {

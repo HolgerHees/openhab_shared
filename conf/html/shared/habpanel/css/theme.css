@@ -476,6 +476,16 @@ body,
 .mvWidget .weatherDetailForecast .week .hour > div {
     justify-content: flex-end;
 }
+.mvWidget .weatherDetailForecast .hour > div > .info > .sunshineDuration {
+    white-space: nowrap;
+}
+
+.mvWidget .weatherDetailForecast .week .hour .temperature .pre,
+.mvWidget .weatherDetailForecast .week .hour .temperature .main {
+    height: auto;
+    text-align: right;
+    line-height: 25px;
+}
 .mvWidget.mvRollershutter.upActive div.up, 
 .mvWidget.mvRollershutter.downActive div.down,
 .mvWidget.mvOutdoorLight.manualActive div.manual,
