@@ -485,6 +485,7 @@ body,
     height: auto;
     text-align: right;
     line-height: 25px;
+    font-size: 1.4vw;
 }
 .mvWidget.mvRollershutter.upActive div.up, 
 .mvWidget.mvRollershutter.downActive div.down,
