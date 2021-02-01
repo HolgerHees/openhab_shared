@@ -28,7 +28,8 @@
 }
 .mvWidget .weatherDetailForecast .summary {
     margin-top: 10px;
-    justify-content: left;
+    display: flex;
+    justify-content: space-between;
 }
 .mvWidget .weatherDetailForecast .summary .cell .txt {
     display: none;
@@ -37,9 +38,6 @@
     padding-top: 5px;
     margin-top: 5px;
     border-top: 1px solid #999;
-}
-.mvWidget .weatherForecast .summary .bullet {
-    padding: 0 10px;
 }
 .mvWidget .weatherDetailForecast .today .hour, .weatherDetailForecast .today .summary {
     border-right: none;
