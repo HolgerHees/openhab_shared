@@ -1168,7 +1168,7 @@ body,
     color: var(--widget-value-color);
 }
 .mvWidget .weatherDetailForecast .hour {
-	padding-top: 1vw;
+	padding-top: 5px;
 }
 .mvWidget .weatherDetailForecast .hour > div {
     display: flex;
