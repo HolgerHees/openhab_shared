@@ -484,7 +484,7 @@ body,
 .mvWidget .weatherDetailForecast .week .hour .temperature .main {
     height: auto;
     text-align: right;
-    line-height: 25px;
+    line-height: 2.0vw;
     font-size: 1.7vw;
 }
 .mvWidget.mvRollershutter.upActive div.up, 

@@ -17,6 +17,11 @@
     font-size: 14px;
     line-height: 14px;  
 }
+.mvWidget .weatherDetailForecast .week .hour .temperature .pre,
+.mvWidget .weatherDetailForecast .week .hour .temperature .main {
+    line-height: 20px;
+    font-size: 16px;
+}
 .mvWidget .weatherDetailForecast .hour > div > .temperature > .main,
 .mvWidget .weatherDetailForecast .hour > div > .temperature > .pre,
 .mvWidget .weatherDetailForecast .title {
