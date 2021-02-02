@@ -136,7 +136,7 @@ html.dark, html.dark body
 
     --primary-color: white !important;
     --primary-light-color: #808080 !important;
-    --primary-dark-color: rgba(255,255,255,1) !important;
+    --primary-dark-color: rgba(255,255,255,0.2) !important;
     --primary-icon-color: var(--primary-dark-color) !important;
     --widget-text-color: white;
     --widget-value-color: white;
