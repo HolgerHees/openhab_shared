@@ -160,8 +160,8 @@ html.light, html.light body {
     --body-bg: white;
 
     --primary-color: #333 !important;
-    --primary-light-color: #6e6e6e !important;
-    --primary-dark-color: rgba(0,0,0,1) !important;
+    --primary-light-color: rgba(51,122,183,.22) !important;
+    --primary-dark-color: rgba(85,118,210,0.3) !important;
     --primary-icon-color: var(--primary-dark-color) !important;
     --widget-text-color: #333;
     --widget-value-color: #333;
@@ -172,8 +172,13 @@ html.light, html.light body {
     --sub-icon-color: #333;
     --widget-text-color-nonimportant: #333;
     --widget-value-color-weather-raindrop: #333;
-    --widget-button-background-marker: #DDD;
+    --widget-button-background-marker: rgba(51,122,183,.12);
 } 
+
+html.light body .mvWidget .weatherDetailForecast .week .hour > div.active .status {
+    background-color: #1976D2;
+    border: 1px solid #1976D2;
+}
 
 body:not(.basicui) #openButton
 {
