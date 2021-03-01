@@ -265,6 +265,9 @@ html .header {
     background: var(--drawer-bg);
     color: var(--widget-text-color);
 }
+.form-horizontal {
+    color: black !important;
+}
 .icon-tile.colorize {
     filter: invert(60%) sepia(100%) hue-rotate(185deg) saturate(1000%);
     -webkit-filter: invert(60%) sepia(100%) hue-rotate(185deg) saturate(1000%);
