@@ -380,10 +380,16 @@ def itemStateOlderThen(itemOrName, refDate):
     return not itemStateNewerThen(itemOrName, refDate)
 
 def itemLastUpdateNewerThen(itemOrName, refDate):
-    return getItemLastUpdate(itemOrName).isAfter(refDate)
+    try:
+        return getItemLastUpdate(itemOrName).isAfter(refDate)
+    except NotInitialisedException:
+      return False
 
 def itemLastUpdateOlderThen(itemOrName, refDate):
-    return not itemLastUpdateNewerThen(itemOrName, refDate)
+    try:
+      return not itemLastUpdateNewerThen(itemOrName, refDate)
+    except NotInitialisedException:
+      return True
 
 def getItemLastUpdate(itemOrName):
     item = _getItem(itemOrName)
