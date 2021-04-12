@@ -14,26 +14,25 @@ from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
 
 from org.joda.time import DateTime
 
+from core.jsr223 import scope
+
 from core.actions import Telegram #, XMPP
-from core.jsr223 import scope, get_automation_manager
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 
 from org.slf4j import LoggerFactory
 
 from configuration import LOG_PREFIX, allTelegramBots, allTelegramAdminBots
 
-#log = logging.getLogger(LOG_PREFIX)
 log = LoggerFactory.getLogger(LOG_PREFIX)
 
-scope.scriptExtension.importPreset("RuleSimple")
 scriptExtension = scope.scriptExtension
 itemRegistry = scope.itemRegistry
-SimpleRule = scope.SimpleRule
 things = scope.things
 items = scope.items
 events = scope.events
 
-scriptExtension.importPreset("RuleSimple")
+automationManager = scope.automationManager
+SimpleRule = scope.SimpleRule
 
 class rule(object):
     def __init__(self, name,profile=None):
@@ -69,7 +68,7 @@ class rule(object):
         #subclass.log = logging.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
         subclass.log = LoggerFactory.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
 
-        get_automation_manager().addRule(subclass())
+        automationManager.addRule(subclass())
 
         subclass.log.debug("Rule initialised")
         
