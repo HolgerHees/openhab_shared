@@ -15,8 +15,7 @@ from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
 from org.joda.time import DateTime
 
 from core.actions import Telegram #, XMPP
-from core.jsr223 import scope, get_scope, get_automation_manager
-#from core.log import logging
+from core.jsr223 import scope, get_automation_manager
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 
 from org.slf4j import LoggerFactory
