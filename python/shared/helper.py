@@ -19,6 +19,7 @@ try:
 
     from org.joda.time.format import DateTimeFormat
     class DateTimeFormatter(object):
+        @staticmethod
         def ofPattern(pattern):
             return DateTimeFormat.forPattern(pattern)
             
