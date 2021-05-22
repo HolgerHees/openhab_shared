@@ -7,17 +7,33 @@ import threading
 #import datetime
 from java.lang import NoSuchFieldException
 from org.openhab.core.automation import Rule as SmarthomeRule
-from org.eclipse.smarthome.core.types import UnDefType
 
-from org.eclipse.smarthome.model.persistence.extensions import PersistenceExtensions
-from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
 
-from org.joda.time import DateTime
+try:
+    from org.eclipse.smarthome.core.types import UnDefType
+    from org.eclipse.smarthome.model.persistence.extensions import PersistenceExtensions
+    from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
+
+    from org.joda.time import DateTime
+except:
+    from org.openhab.core.types import UnDefType
+    from org.openhab.core.persistence.extensions import PersistenceExtensions
+    from org.openhab.core.thing import ChannelUID, ThingUID
 
 from core.jsr223 import scope
-
-from core.actions import Telegram #, XMPP
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
+
+try:
+    from core.actions import Telegram #, XMPP
+except:
+    class Telegram(object):
+        def sendTelegram(recipient, message):
+            bot = scope.actions.get("telegram", "telegram:telegramBot:".format(recipient))
+            bot.sendTelegram(message)
+            
+        def sendTelegramPhoto(recipient, url, message):
+            bot = scope.actions.get("telegram", "telegram:telegramBot:".format(recipient))
+            bot.sendTelegramPhoto(url,message)
 
 from org.slf4j import LoggerFactory
 
