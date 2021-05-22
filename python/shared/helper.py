@@ -15,10 +15,23 @@ try:
     from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
 
     from org.joda.time import DateTime
+    ZonedDateTime = DateTime
+
+    from org.joda.time.format import DateTimeFormat
+    class DateTimeFormatter(object):
+        def ofPattern(pattern):
+            return DateTimeFormat.forPattern(pattern)
+            
+    isOpenhab2 = True
 except:
     from org.openhab.core.types import UnDefType
     from org.openhab.core.persistence.extensions import PersistenceExtensions
     from org.openhab.core.thing import ChannelUID, ThingUID
+    
+    from java.time import ZonedDateTime
+    from java.time.format import DateTimeFormatter
+        
+    isOpenhab2 = False
 
 from core.jsr223 import scope
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
@@ -384,8 +397,7 @@ def sendCommand(itemOrName, command):
 
 # *** DateTime helper ***
 def getNow():
-    return DateTime.now()
-
+    return ZonedDateTime.now()
 
 def itemStateNewerThen(itemOrName, refDate):
     return getItemState(itemOrName).calendar.getTimeInMillis() > refDate.getMillis()
