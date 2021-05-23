@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import traceback
 import time
 import profile, pstats, io
@@ -8,28 +10,22 @@ import threading
 from java.lang import NoSuchFieldException
 from org.openhab.core.automation import Rule as SmarthomeRule
 
-
 try:
     from org.eclipse.smarthome.core.types import UnDefType
     from org.eclipse.smarthome.model.persistence.extensions import PersistenceExtensions
     from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
 
     from org.joda.time import DateTime
-    ZonedDateTime = DateTime
-
     from org.joda.time.format import DateTimeFormat
-    class DateTimeFormatter(object):
-        @staticmethod
-        def ofPattern(pattern):
-            return DateTimeFormat.forPattern(pattern)
             
     isOpenhab2 = True
-except:
+except Exception as e:
+  
     from org.openhab.core.types import UnDefType
     from org.openhab.core.persistence.extensions import PersistenceExtensions
     from org.openhab.core.thing import ChannelUID, ThingUID
     
-    from java.time import ZonedDateTime
+    from java.time import ZonedDateTime, Instant, ZoneId
     from java.time.format import DateTimeFormatter
         
     isOpenhab2 = False
@@ -324,14 +320,18 @@ def getFilteredChildItems(itemOrName, state):
     else:
         return filter(lambda child: child.getState() == state, items)
 
-
+def getItemStateWithFallback(itemOrName,fallback):
+    state = getItemState(itemOrName)
+    if isinstance(state,UnDefType) and fallback is not None:
+        state = fallback
+    return state
+  
 def getItemState(itemOrName):
     name = _getItemName(itemOrName)
     state = items.get(name)
     if state is None:
         raise NotInitialisedException(u"Item state for {} not found".format(name))
     return state
-
 
 def getHistoricItemEntry(itemOrName, refDate):
     item = _getItem(itemOrName)
@@ -395,13 +395,121 @@ def sendCommand(itemOrName, command):
     item = _getItem(itemOrName)
     return events.sendCommand(item, command)
 
+#class DecimalHelper(object):
+#    @staticmethod
+#    def intValue(state,fallback=0):
+#        return fallback if isinstance(state,UnDefType) else state.intValue()
 
-# *** DateTime helper ***
-def getNow():
-    return ZonedDateTime.now()
+# *** DateTime helper ***  
+if isOpenhab2:
+    class DateTimeHelper(object):
+        @staticmethod
+        def getNow():
+            return DateTime.now()
+        
+        @staticmethod
+        def getMillis(refDate):
+            return refDate.getMillis()
+          
+        @staticmethod
+        def getMillisFromHistoricItem(historicItem):
+            return historicItem.getTimestamp().getTime()
+          
+        @staticmethod
+        def getHour(refDate):
+            return refDate.getHourOfDay()
+
+        @staticmethod
+        def getMinute(refDate):
+            return refDate.getMinuteOfHour()
+
+        @staticmethod
+        def createFromMillis(millis):
+            return DateTime(millis)
+          
+        @staticmethod
+        def createFromDateTimeType(dateTimeType):
+            return DateTime(dateTimeType.calendar.getTimeInMillis())
+
+        @staticmethod
+        def createAtStartOfDay(refDate):
+            return refDate.withTimeAtStartOfDay()
+            
+        @staticmethod
+        def createWithDate(refDate,year,month,day):
+            return refDate.withDate(year,month,day)
+            
+        @staticmethod
+        def createWithZone(refDate,zone):
+            return refDate.toDateTime(zone)
+        
+        @staticmethod
+        def getFormat(pattern):
+            return DateTimeFormat.forPattern(pattern)
+
+        @staticmethod
+        def printFormatted(refDate,pattern):
+            return pattern.print(refDate)
+
+        @staticmethod
+        def getAsState(refDate):
+            return refDate.toString()
+else:
+    class DateTimeHelper(object):
+        @staticmethod
+        def getNow():
+            return ZonedDateTime.now()
+
+        @staticmethod
+        def getMillis(refDate):
+            return refDate.toInstant().toEpochMilli()
+        
+        @staticmethod
+        def getMillisFromHistoricItem(historicItem):
+            return historicItem.getTimestamp().toInstant().toEpochMilli()
+          
+        @staticmethod
+        def getHour(refDate):
+            return refDate.getHour()
+
+        @staticmethod
+        def getMinute(refDate):
+            return refDate.getMinute()
+
+        @staticmethod
+        def createFromMillis(millis):
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault())
+          
+        @staticmethod
+        def createFromDateTimeType(dateTimeType):
+            return dateTimeType.getZonedDateTime()
+
+        @staticmethod
+        def createAtStartOfDay(refDate):
+            return refDate.toLocalDate().atStartOfDay(refDate.getZone())
+
+        @staticmethod
+        def createWithDate(refDate,year,month,day):
+            return refDate.withYear(year).withMonth(month).withDayOfMonth(day)
+
+        @staticmethod
+        def createWithZone(refDate,zone):
+            return refDate.withZoneSameInstant(zone)
+
+        @staticmethod
+        def getFormat(pattern):
+            return DateTimeFormatter.ofPattern(pattern)
+
+        @staticmethod
+        def printFormatted(refDate,pattern):
+            return pattern.format(refDate)
+
+        @staticmethod
+        def getAsState(refDate):
+            return refDate.toLocalDateTime().toString()
 
 def itemStateNewerThen(itemOrName, refDate):
-    return getItemState(itemOrName).calendar.getTimeInMillis() > refDate.getMillis()
+    return DateTimeHelper.getMillis(DateTimeHelper.createFromDateTimeType(getItemState(itemOrName))) > DateTimeHelper.getMillis(refDate)
 
 def itemStateOlderThen(itemOrName, refDate):
     return not itemStateNewerThen(itemOrName, refDate)
@@ -422,7 +530,8 @@ def getItemLastUpdate(itemOrName):
     item = _getItem(itemOrName)
     lastUpdate = PersistenceExtensions.lastUpdate(item)
     if lastUpdate is None:
-        raise NotInitialisedException("Item lastUpdate for '" + item.getName() + "' not found")
+        return DateTimeHelper.createFromMillis(0)
+        #raise NotInitialisedException("Item lastUpdate for '" + item.getName() + "' not found")
     return lastUpdate
 
 def itemLastChangeNewerThen(itemOrName, refDate):
@@ -441,7 +550,7 @@ def getItemLastChange(itemOrName):
 def getStableItemState( now, itemName, checkTimeRange ):
         
     currentEndTime = now
-    currentEndTimeMillis = currentEndTime.getMillis()
+    currentEndTimeMillis = DateTimeHelper.getMillis(currentEndTime)
     minTimeMillis = currentEndTimeMillis - ( checkTimeRange * 60 * 1000 )
 
     value = 0.0
@@ -453,7 +562,7 @@ def getStableItemState( now, itemName, checkTimeRange ):
     entry = getHistoricItemEntry(item, now)
     
     while True:
-        currentStartMillis = entry.getTimestamp().getTime()
+        currentStartMillis = DateTimeHelper.getMillisFromHistoricItem(entry)
 
         if currentStartMillis < minTimeMillis:
             currentStartMillis = minTimeMillis
@@ -469,7 +578,7 @@ def getStableItemState( now, itemName, checkTimeRange ):
         if currentEndTimeMillis < minTimeMillis:
             break
 
-        currentEndTime = DateTime(currentEndTimeMillis)
+        currentEndTime = DateTimeHelper.createFromMillis(currentEndTimeMillis)
 
         entry = getHistoricItemEntry(item, currentEndTime )
         
