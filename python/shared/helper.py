@@ -33,17 +33,19 @@ except Exception as e:
 from core.jsr223 import scope
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 
-try:
+if isOpenhab2:
     from core.actions import Telegram #, XMPP
-except:
+else:
     class Telegram(object):
-        def sendTelegram(recipient, message):
-            bot = scope.actions.get("telegram", "telegram:telegramBot:".format(recipient))
-            bot.sendTelegram(message)
-            
-        def sendTelegramPhoto(recipient, url, message):
-            bot = scope.actions.get("telegram", "telegram:telegramBot:".format(recipient))
-            bot.sendTelegramPhoto(url,message)
+      @staticmethod
+      def sendTelegram(recipient, message):
+          bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+          bot.sendTelegram(message)
+          
+      @staticmethod
+      def sendTelegramPhoto(recipient, url, message):
+          bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+          bot.sendTelegramPhoto(url,message)
 
 from org.slf4j import LoggerFactory
 
