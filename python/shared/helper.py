@@ -398,7 +398,7 @@ def sendCommand(itemOrName, command):
     return events.sendCommand(item, command)
 
 def itemStateNewerThen(itemOrName, refDate):
-    return DateTimeHelper.getMillis(DateTimeHelper.createFromDateTimeType(getItemState(itemOrName))) > DateTimeHelper.getMillis(refDate)
+    return getItemState(itemOrName).getZonedDateTime().toInstant().toEpochMilli() > refDate.toInstant().toEpochMilli()
 
 def itemStateOlderThen(itemOrName, refDate):
     return not itemStateNewerThen(itemOrName, refDate)
@@ -419,7 +419,7 @@ def getItemLastUpdate(itemOrName):
     item = _getItem(itemOrName)
     lastUpdate = PersistenceExtensions.lastUpdate(item)
     if lastUpdate is None:
-        return DateTimeHelper.createFromMillis(0)
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())
         #raise NotInitialisedException("Item lastUpdate for '" + item.getName() + "' not found")
     return lastUpdate
 
@@ -439,7 +439,7 @@ def getItemLastChange(itemOrName):
 def getStableItemState( now, itemName, checkTimeRange ):
         
     currentEndTime = now
-    currentEndTimeMillis = DateTimeHelper.getMillis(currentEndTime)
+    currentEndTimeMillis = currentEndTime.toInstant().toEpochMilli()
     minTimeMillis = currentEndTimeMillis - ( checkTimeRange * 60 * 1000 )
 
     value = 0.0
@@ -451,7 +451,7 @@ def getStableItemState( now, itemName, checkTimeRange ):
     entry = getHistoricItemEntry(item, now)
     
     while True:
-        currentStartMillis = DateTimeHelper.getMillisFromHistoricItem(entry)
+        currentStartMillis = entry.getTimestamp().toInstant().toEpochMilli()
 
         if currentStartMillis < minTimeMillis:
             currentStartMillis = minTimeMillis
@@ -467,7 +467,7 @@ def getStableItemState( now, itemName, checkTimeRange ):
         if currentEndTimeMillis < minTimeMillis:
             break
 
-        currentEndTime = DateTimeHelper.createFromMillis(currentEndTimeMillis)
+        currentEndTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(currentEndTimeMillis), ZoneId.systemDefault())
 
         entry = getHistoricItemEntry(item, currentEndTime )
         
