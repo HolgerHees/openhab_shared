@@ -398,7 +398,10 @@ def sendCommand(itemOrName, command):
     return events.sendCommand(item, command)
 
 def itemStateNewerThen(itemOrName, refDate):
-    return getItemState(itemOrName).getZonedDateTime().toInstant().toEpochMilli() > refDate.toInstant().toEpochMilli()
+    state = getItemState(itemOrName)
+    if isinstance(state,UnDefType):
+        return False
+    return state.getZonedDateTime().toInstant().toEpochMilli() > refDate.toInstant().toEpochMilli()
 
 def itemStateOlderThen(itemOrName, refDate):
     return not itemStateNewerThen(itemOrName, refDate)
