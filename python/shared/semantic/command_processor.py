@@ -124,10 +124,14 @@ class CommandProcessor:
         # check sub elements
         if semantic_item.getItem().getType() == "Group":
             for _item in semantic_item.getItem().getMembers():
-                _semantic_item = self.semantic_model.getSemanticItem(_item.getName())
-                if location_search and _semantic_item.getSemanticType() != semantic_item.getSemanticType():
-                    continue
-                matches += self._searchItems(_semantic_item,unprocessed_search,items_to_skip,location_search,full_matched_terms,part_matched_terms,_processed_items)
+                try:
+                    _semantic_item = self.semantic_model.getSemanticItem(_item.getName())
+                    if location_search and _semantic_item.getSemanticType() != semantic_item.getSemanticType():
+                        continue
+                    matches += self._searchItems(_semantic_item,unprocessed_search,items_to_skip,location_search,full_matched_terms,part_matched_terms,_processed_items)
+                except KeyError:
+                    #self.log.info(u"item {} not found".format(_item.getName()))
+                    pass
                 
         # add own match only if there are no sub matches
         if is_match and len(matches) == 0:
