@@ -193,7 +193,7 @@ function SmartHomeSubscriber(params) {
 
     function ChangeListener() {
         
-        var subscribeLocation = "/rest/events?topics=smarthome/items/*/statechanged";
+        var subscribeLocation = "/rest/events?topics=openhab/items/*/statechanged";
         
         var _t = this;
             
@@ -206,7 +206,8 @@ function SmartHomeSubscriber(params) {
 
             var data = JSON.parse(payload.data);
             
-            var itemName = data.topic.substr(16);
+            var itemName = data.topic.substr(14);
+
             itemName = itemName.substr(0,itemName.indexOf("/"));
 
             var payload = JSON.parse(data.payload);
