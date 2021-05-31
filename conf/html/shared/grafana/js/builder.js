@@ -527,7 +527,6 @@ function GrafanaBuilder(panelConfigs)
     
     function getFromItem()
     {
-        console.log(resolveParam({}, "fromItem"));
         return resolveParam({}, "fromItem");
     }
 
