@@ -439,11 +439,14 @@ def getItemLastChange(itemOrName):
         raise NotInitialisedException("Item lastChange for '" + item.getName() + "' not found")
     return lastChange
 
-def getStableItemState( now, itemName, checkTimeRange ):
+def getStableMinMaxItemState( now, itemName, checkTimeRange ):
         
     currentEndTime = now
     currentEndTimeMillis = currentEndTime.toInstant().toEpochMilli()
     minTimeMillis = currentEndTimeMillis - ( checkTimeRange * 60 * 1000 )
+
+    minValue = None
+    maxValue = None
 
     value = 0.0
     duration = 0
@@ -462,6 +465,12 @@ def getStableItemState( now, itemName, checkTimeRange ):
         _duration = currentEndTimeMillis - currentStartMillis
         _value = entry.getState().doubleValue()
 
+        if minValue == None or minValue > _value:
+            minValue = _value
+
+        if maxValue == None or maxValue < _value:
+            maxValue = _value
+
         duration = duration + _duration
         value = value + ( _value * _duration )
 
@@ -476,6 +485,12 @@ def getStableItemState( now, itemName, checkTimeRange ):
         
     value = ( value / duration )
 
+    return [ value, minValue, maxValue ]
+
+def getStableItemState( now, itemName, checkTimeRange ):
+        
+    value, _, _ = getStableMinMaxItemState(now,itemName, checkTimeRange)
+        
     return value
 
 # *** Notifications ***
