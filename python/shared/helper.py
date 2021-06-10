@@ -284,14 +284,14 @@ def getGroupMemberUpdateTrigger(itemOrName, state=None, triggerName=None):
     triggers = []
     items = getGroupMember(getItem(itemOrName))
     for item in items:
-        triggers.append(ItemStateUpdateTrigger(item.getName(), state, triggerName))
+        triggers.append(ItemStateUpdateTrigger(item.getName(), state=state, trigger_name=triggerName))
     return triggers
 
 def getGroupMemberChangeTrigger(itemOrName, state=None, triggerName=None):
     triggers = []
     items = getGroupMember(itemOrName)
     for item in items:
-        triggers.append(ItemStateChangeTrigger(item.getName(), state, triggerName))
+        triggers.append(ItemStateChangeTrigger(item.getName(), state=state, trigger_name=triggerName))
     return triggers
 
 
