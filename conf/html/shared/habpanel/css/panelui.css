@@ -141,14 +141,15 @@
   }
 }
 #rainButton.open {
+    transition: right 500ms ease;
     top: 7px !important;
-    right: 50px !important;
+    right: calc( 100% - 120px ) !important;
     color: white;
     margin: 0px 5px 5px 5px;
     border-color: white;
     border-radius: 4px;
     padding: 2px 5px;
-    background-color: rgba(0,60,136,.5);
+    background-color: rgba(68,65,65,0.84);
     font-weight: 500; 
     font-size: 1.14em;
     height: 1.5em;
@@ -167,7 +168,7 @@
     padding-left: 0;
     padding-top: 0px;
     margin-top: 0px;
-    top: -60px;
+    top: 0px;
     right: 0;
     left: 0;
     transform: translate3d(100%, 0, 0);
