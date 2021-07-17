@@ -16,6 +16,12 @@
 
 "use strict";
 
+var domainParts = document.location.hostname.split('.')
+var subDomain = domainParts.shift();
+var auth_type = subDomain.substring(0,3);
+if( auth_type != 'fa-' && auth_type != 'ba-' ) auth_type = "";
+var domain = domainParts.join(".");
+
 var SMARTHOME_GRAFANA_DEFAULTS = {
     // library
     debug: "false",
@@ -24,7 +30,7 @@ var SMARTHOME_GRAFANA_DEFAULTS = {
     // ESH sitemap
     sitemap: "default",
     // Grafana URL
-    urlPrefix: "/grafana",
+    urlPrefix: "//" + auth_type + "grafana." + domain,
     panelPath: "/d-solo/",
     renderPanelPath: "/render/d-solo/",
     // Grafana panel parameters
@@ -466,7 +472,7 @@ function GrafanaBuilder(panelConfigs)
     var timeRange;
     
     var cssLink = document.createElement("link");
-    cssLink.href = "/static/shared/grafana/css/panel.css"; 
+    cssLink.href = "//openhab." + domain + "/static/shared/grafana/css/panel.css"; 
     cssLink.rel = "stylesheet"; 
     cssLink.type = "text/css"; 
     document.head.appendChild(cssLink);
@@ -518,7 +524,7 @@ function GrafanaBuilder(panelConfigs)
     {
         iframes[i].onload = function() {
             var cssLink = this.contentWindow.document.createElement("link");
-            cssLink.href = "/static/shared/grafana/css/grafana.css"; 
+            cssLink.href = "//openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
             cssLink.rel = "stylesheet"; 
             cssLink.type = "text/css"; 
             this.contentWindow.document.head.appendChild(cssLink);
