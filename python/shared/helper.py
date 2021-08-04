@@ -10,42 +10,26 @@ import threading
 from java.lang import NoSuchFieldException
 from org.openhab.core.automation import Rule as SmarthomeRule
 
-try:
-    from org.eclipse.smarthome.core.types import UnDefType
-    from org.eclipse.smarthome.model.persistence.extensions import PersistenceExtensions
-    from org.eclipse.smarthome.core.thing import ChannelUID, ThingUID
+from org.openhab.core.types import UnDefType
+from org.openhab.core.persistence.extensions import PersistenceExtensions
+from org.openhab.core.thing import ChannelUID, ThingUID
 
-    from org.joda.time import DateTime
-    from org.joda.time.format import DateTimeFormat
-            
-    isOpenhab2 = True
-except Exception as e:
-  
-    from org.openhab.core.types import UnDefType
-    from org.openhab.core.persistence.extensions import PersistenceExtensions
-    from org.openhab.core.thing import ChannelUID, ThingUID
-    
-    from java.time import ZonedDateTime, Instant, ZoneId
-    from java.time.format import DateTimeFormatter
+from java.time import ZonedDateTime, Instant, ZoneId
+from java.time.format import DateTimeFormatter
         
-    isOpenhab2 = False
-
 from core.jsr223 import scope
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 
-if isOpenhab2:
-    from core.actions import Telegram #, XMPP
-else:
-    class Telegram(object):
-      @staticmethod
-      def sendTelegram(recipient, message):
-          bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-          bot.sendTelegram(message)
-          
-      @staticmethod
-      def sendTelegramPhoto(recipient, url, message):
-          bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-          bot.sendTelegramPhoto(url,message)
+class Telegram(object):
+  @staticmethod
+  def sendTelegram(recipient, message):
+      bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+      bot.sendTelegram(message)
+      
+  @staticmethod
+  def sendTelegramPhoto(recipient, url, message):
+      bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+      bot.sendTelegramPhoto(url,message)
 
 from org.slf4j import LoggerFactory
 
