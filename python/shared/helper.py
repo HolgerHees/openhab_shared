@@ -4,6 +4,7 @@ import traceback
 import time
 import profile, pstats, io
 import threading
+import sys
 
 #from java.util import UUID
 #import datetime
@@ -16,20 +17,9 @@ from org.openhab.core.thing import ChannelUID, ThingUID
 
 from java.time import ZonedDateTime, Instant, ZoneId
 from java.time.format import DateTimeFormatter
-        
-from core.jsr223 import scope
+    
+#from core.jsr223 import scope
 from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
-
-class Telegram(object):
-  @staticmethod
-  def sendTelegram(recipient, message):
-      bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-      bot.sendTelegram(message)
-      
-  @staticmethod
-  def sendTelegramPhoto(recipient, url, message):
-      bot = scope.actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-      bot.sendTelegramPhoto(url,message)
 
 from org.slf4j import LoggerFactory
 
@@ -37,14 +27,33 @@ from configuration import LOG_PREFIX, allTelegramBots, allTelegramAdminBots
 
 log = LoggerFactory.getLogger(LOG_PREFIX)
 
-scriptExtension = scope.scriptExtension
-itemRegistry = scope.itemRegistry
-things = scope.things
-items = scope.items
-events = scope.events
+scope = sys._getframe(1).f_globals
+  
+actions           = scope.get("actions")
 
-automationManager = scope.automationManager
-SimpleRule = scope.SimpleRule
+itemRegistry      = scope.get("itemRegistry")
+items             = scope.get("items")
+things            = scope.get("things")
+
+events            = scope.get("events")
+scriptExtension   = scope.get("scriptExtension")
+
+scriptExtension.importPreset("RuleSupport")
+automationManager = scope.get("automationManager")
+
+scriptExtension.importPreset("RuleSimple")
+SimpleRule = scope.get("SimpleRule")
+
+class Telegram(object):
+  @staticmethod
+  def sendTelegram(recipient, message):
+      bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+      bot.sendTelegram(message)
+      
+  @staticmethod
+  def sendTelegramPhoto(recipient, url, message):
+      bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+      bot.sendTelegramPhoto(url,message)
 
 class rule(object):
     def __init__(self, name,profile=None):
