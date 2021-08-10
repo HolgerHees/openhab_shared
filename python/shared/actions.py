@@ -1,7 +1,8 @@
 import sys
-from core import osgi
+from shared.services import find_service
 
-actions = osgi.find_services("org.openhab.core.model.script.engine.action.ActionService", None)
+
+actions = find_service("org.openhab.core.model.script.engine.action.ActionService", None)
 
 _MODULE = sys.modules[__name__]
 

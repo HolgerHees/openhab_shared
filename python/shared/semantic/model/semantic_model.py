@@ -1,18 +1,17 @@
 #https://github.com/openhab/openhab-core/blob/master/bundles/org.openhab.core.semantics/model/SemanticTags.csv
-from core.actions import HTTP
+from shared.actions import HTTP
+from shared.services import get_service
+
 import json
 import re
 import io
 
-from core import osgi,metadata
-try:
-    from org.openhab.core.items import Metadata, MetadataKey
-except:
-    from org.eclipse.smarthome.core.items import Metadata, MetadataKey
+from org.openhab.core.items import Metadata, MetadataKey
+
     
-METADATA_REGISTRY = osgi.get_service(
+METADATA_REGISTRY = get_service(
     "org.openhab.core.items.MetadataRegistry"
-) or osgi.get_service(
+) or get_service(
     "org.eclipse.smarthome.core.items.MetadataRegistry"
 )
 

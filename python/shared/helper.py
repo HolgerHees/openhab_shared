@@ -6,8 +6,6 @@ import profile, pstats, io
 import threading
 import sys
 
-#from java.util import UUID
-#import datetime
 from java.lang import NoSuchFieldException
 from org.openhab.core.automation import Rule as SmarthomeRule
 
@@ -17,9 +15,9 @@ from org.openhab.core.thing import ChannelUID, ThingUID
 
 from java.time import ZonedDateTime, Instant, ZoneId
 from java.time.format import DateTimeFormatter
-    
-#from core.jsr223 import scope
-from core.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
+
+from shared.jsr223 import scope    
+from shared.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 
 from org.slf4j import LoggerFactory
 
@@ -27,8 +25,6 @@ from configuration import LOG_PREFIX, allTelegramBots, allTelegramAdminBots
 
 log = LoggerFactory.getLogger(LOG_PREFIX)
 
-scope = sys._getframe(1).f_globals
-  
 actions           = scope.get("actions")
 
 itemRegistry      = scope.get("itemRegistry")
