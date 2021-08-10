@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from shared.jsr223 import scope
 
 import uuid
