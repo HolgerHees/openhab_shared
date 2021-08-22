@@ -7,19 +7,19 @@ import threading
 import sys
 
 from java.lang import NoSuchFieldException
+from java.time import ZonedDateTime, Instant, ZoneId
+from java.time.format import DateTimeFormatter
+
+from org.slf4j import LoggerFactory
+
 from org.openhab.core.automation import Rule as SmarthomeRule
 
 from org.openhab.core.types import UnDefType
 from org.openhab.core.persistence.extensions import PersistenceExtensions
 from org.openhab.core.thing import ChannelUID, ThingUID
 
-from java.time import ZonedDateTime, Instant, ZoneId
-from java.time.format import DateTimeFormatter
-
 from shared.jsr223 import scope    
 from shared.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
-
-from org.slf4j import LoggerFactory
 
 from configuration import LOG_PREFIX, allTelegramBots, allTelegramAdminBots
 
@@ -39,17 +39,6 @@ automationManager = scope.get("automationManager")
 
 scriptExtension.importPreset("RuleSimple")
 SimpleRule = scope.get("SimpleRule")
-
-class Telegram(object):
-  @staticmethod
-  def sendTelegram(recipient, message):
-      bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-      bot.sendTelegram(message)
-      
-  @staticmethod
-  def sendTelegramPhoto(recipient, url, message):
-      bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-      bot.sendTelegramPhoto(url,message)
 
 class rule(object):
     def __init__(self, name,profile=None):
@@ -488,9 +477,11 @@ def sendNotification(header, message, url=None, recipients = None):
         recipients = allTelegramBots
     for recipient in recipients:
         if url == None:
-            Telegram.sendTelegram(recipient, "*" + header + "*: " + message)
+            bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+            bot.sendTelegram("*" + header + "*: " + message)
         else:
-            Telegram.sendTelegramPhoto(recipient, url, "*" + header + "*: " + message)
+            bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
+            bot.sendTelegramPhoto(url,"*" + header + "*: " + message)
 
 def sendNotificationToAllAdmins(header, message, url=None):
     sendNotification(header,message,url,allTelegramAdminBots)
