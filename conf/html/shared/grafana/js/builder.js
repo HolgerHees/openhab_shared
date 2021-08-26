@@ -472,7 +472,7 @@ function GrafanaBuilder(panelConfigs)
     var timeRange;
     
     var cssLink = document.createElement("link");
-    cssLink.href = "//openhab." + domain + "/static/shared/grafana/css/panel.css"; 
+    cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/panel.css"; 
     cssLink.rel = "stylesheet"; 
     cssLink.type = "text/css"; 
     document.head.appendChild(cssLink);
@@ -524,7 +524,7 @@ function GrafanaBuilder(panelConfigs)
     {
         iframes[i].onload = function() {
             var cssLink = this.contentWindow.document.createElement("link");
-            cssLink.href = "//openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
+            cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
             cssLink.rel = "stylesheet"; 
             cssLink.type = "text/css"; 
             this.contentWindow.document.head.appendChild(cssLink);
