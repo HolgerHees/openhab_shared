@@ -10,6 +10,8 @@ from java.lang import NoSuchFieldException
 from java.time import ZonedDateTime, Instant, ZoneId
 from java.time.format import DateTimeFormatter
 
+from inspect import getframeinfo, stack
+
 from org.slf4j import LoggerFactory
 
 from org.openhab.core.automation import Rule as SmarthomeRule
@@ -473,15 +475,27 @@ def getStableItemState( now, itemName, checkTimeRange ):
 
 # *** Notifications ***
 def sendNotification(header, message, url=None, recipients = None):
+    chars = {
+        u"_": u"\\_"
+    }
+    for k,v in chars.iteritems():
+        message = message.replace(k,v)
+        
     if recipients is None:
         recipients = allTelegramBots
     for recipient in recipients:
         if url == None:
             bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-            bot.sendTelegram("*" + header + "*: " + message)
+            result = bot.sendTelegram("*" + header + "*: " + message)
+            if result == 0:
+                caller = getframeinfo(stack()[1][0])
+                log.error(u"Failed to send telegram message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
         else:
             bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-            bot.sendTelegramPhoto(url,"*" + header + "*: " + message)
+            result = bot.sendTelegramPhoto(url,"*" + header + "*: " + message)
+            if result == 0:
+                caller = getframeinfo(stack()[1][0])
+                log.error(u"Failed to send telegram message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
 
 def sendNotificationToAllAdmins(header, message, url=None):
     sendNotification(header,message,url,allTelegramAdminBots)
