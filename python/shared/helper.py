@@ -9,6 +9,7 @@ import sys
 from java.lang import NoSuchFieldException
 from java.time import ZonedDateTime, Instant, ZoneId
 from java.time.format import DateTimeFormatter
+from java.time.temporal import ChronoUnit
 
 from inspect import getframeinfo, stack
 
@@ -422,8 +423,7 @@ def getItemLastChange(itemOrName):
 def getStableMinMaxItemState( now, itemName, checkTimeRange ):
         
     currentEndTime = now
-    currentEndTimeMillis = currentEndTime.toInstant().toEpochMilli()
-    minTimeMillis = currentEndTimeMillis - ( checkTimeRange * 60 * 1000 )
+    minTime = currentEndTime.minusMinutes( checkTimeRange )
 
     minValue = None
     maxValue = None
@@ -437,12 +437,12 @@ def getStableMinMaxItemState( now, itemName, checkTimeRange ):
     entry = getHistoricItemEntry(item, now)
     
     while True:
-        currentStartMillis = entry.getTimestamp().toInstant().toEpochMilli()
+        currentStartTime = entry.getTimestamp()
 
-        if currentStartMillis < minTimeMillis:
-            currentStartMillis = minTimeMillis
+        if currentStartTime.isBefore( minTime ):
+            currentStartTime = minTime
 
-        _duration = currentEndTimeMillis - currentStartMillis
+        _duration = ChronoUnit.NANOS.between( currentStartTime, currentEndTime )
         _value = entry.getState().doubleValue()
 
         if minValue == None or minValue > _value:
@@ -454,12 +454,10 @@ def getStableMinMaxItemState( now, itemName, checkTimeRange ):
         duration = duration + _duration
         value = value + ( _value * _duration )
 
-        currentEndTimeMillis = currentStartMillis -1
+        currentEndTime = currentStartTime.minusNanos(1)
 
-        if currentEndTimeMillis < minTimeMillis:
+        if currentEndTime.isBefore( minTime ):
             break
-
-        currentEndTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(currentEndTimeMillis), ZoneId.systemDefault())
 
         entry = getHistoricItemEntry(item, currentEndTime )
         
