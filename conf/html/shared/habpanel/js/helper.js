@@ -222,6 +222,11 @@ var mvInitializer = function(){
                             {
                                 let content = scope.$eval(attrs.mvContent,myVars);
                                 element[0].innerText=content;
+                                
+                                if( attrs.mvUnit != undefined )
+                                {
+                                  element[0].innerText+=" " + attrs.mvUnit;
+                                }
                             }
 
                             if( attrs.mvClass != undefined && isItemUsed( scope, updatedItemName, attrs.mvClass, checkVars, myVars ) )
