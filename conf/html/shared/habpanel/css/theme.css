@@ -648,20 +648,26 @@ body,
     height: 10px;
 }
 
-.mvWidget.mvHouse > div .value > div {
-    display: inline;
+.mvWidget.mvHouse > div .value {
+    display: flex;
+    line-height: 1vw;
+    font-size: 1vw;
+}
+.mvWidget.mvHouse div .value > div:last-child {
+    margin: 0 0 0 4px;
 }
 
-.mvWidget.mvHouse div.warn .value > div {
+.mvWidget.mvHouse div.warn .value > div:first-child {
     color: var(--widget-warn-color);
 }
-.mvWidget.mvHouse div.error .value > div {
+.mvWidget.mvHouse div.error .value > div:first-child {
     color: var(--widget-error-color);
 }
 
-.mvWidget.mvHouse div.warn .value > div,
-.mvWidget.mvHouse div.error .value > div {
+.mvWidget.mvHouse div .value > div:first-child {
     font-weight: var(--widget-value-weight);
+    line-height: 1.8vw;
+    font-size: 1.8vw;
 }
 
 .mvWidget.mvImagePopup {
