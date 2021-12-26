@@ -647,6 +647,23 @@ body,
 .mvWidget.mvStatus > div.spacer {
     height: 10px;
 }
+
+.mvWidget.mvHouse > div .value > div {
+    display: inline;
+}
+
+.mvWidget.mvHouse div.warn .value > div {
+    color: var(--widget-warn-color);
+}
+.mvWidget.mvHouse div.error .value > div {
+    color: var(--widget-error-color);
+}
+
+.mvWidget.mvHouse div.warn .value > div,
+.mvWidget.mvHouse div.error .value > div {
+    font-weight: var(--widget-value-weight);
+}
+
 .mvWidget.mvImagePopup {
 	height: 100%;
 }
