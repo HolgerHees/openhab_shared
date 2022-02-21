@@ -464,23 +464,33 @@ function GrafanaPanel(params) {
 
 var grafanaPanels = [];
 
-function GrafanaBuilder(panelConfigs) 
+function GrafanaBuilderCustom(panelConfigs)
 {
-    var isPhone = ( navigator.userAgent.indexOf("Android") != -1 && navigator.userAgent.indexOf("Mobile") != -1 );
-    var theme = isPhone || parent.document.location.pathname.includes("habpanel") ? 'dark' : 'light';
+    var theme = getGrafanaTheme();
 
     var timeRange;
     
-    var cssLink = document.createElement("link");
-    cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/panel.css"; 
-    cssLink.rel = "stylesheet"; 
-    cssLink.type = "text/css"; 
-    document.head.appendChild(cssLink);
-                
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.appendChild(document.createTextNode(".panel-container{ height: " + (100/panelConfigs.length) + "%; }"));
-    document.head.appendChild(style);
+    addPreStyle(panelConfigs);
+    
+    for( var i = 0; i < panelConfigs.length; i++ )
+    {
+        let params = { dashboard: panelConfigs[i][1], theme: theme, panel: panelConfigs[i][2] }
+        for( let [key, value] of Object.entries(panelConfigs[i][3]) )
+        {
+            params[key] = value;
+        }
+        addGrafanaPanel( panelConfigs[i][0], params );
+    }
+
+    addPostStyle();
+}
+function GrafanaBuilder(panelConfigs) 
+{
+    var theme = getGrafanaTheme();
+
+    var timeRange;
+    
+    addPreStyle(panelConfigs);
     
     smartHomeSubscriber.addItemListener(getFromItem(),function(item,state)
     {
@@ -519,17 +529,7 @@ function GrafanaBuilder(panelConfigs)
         addGrafanaPanel( panelConfigs[i][0], { dashboard: panelConfigs[i][1], theme: theme, panelItem: getFromItem(), panelItemFunction: panelItemFunction, fromItem: getFromItem(), fromItemFunction: getTimerange } );
     }
 
-    var iframes = document.getElementsByTagName("iframe");
-    for( var i = 0; i < iframes.length; i++ )
-    {
-        iframes[i].onload = function() {
-            var cssLink = this.contentWindow.document.createElement("link");
-            cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
-            cssLink.rel = "stylesheet"; 
-            cssLink.type = "text/css"; 
-            this.contentWindow.document.head.appendChild(cssLink);
-        };
-    }
+    addPostStyle();
     
     function getFromItem()
     {
@@ -549,38 +549,73 @@ function GrafanaBuilder(panelConfigs)
         
         return panel[2];
     }
-    
-    function createGuid()
+}
+
+function getGrafanaTheme()
+{
+    var isPhone = ( navigator.userAgent.indexOf("Android") != -1 && navigator.userAgent.indexOf("Mobile") != -1 );
+    return isPhone || parent.document.location.pathname.includes("habpanel") ? 'dark' : 'light';
+}
+
+function addPreStyle(panelConfigs)
+{
+    var cssLink = document.createElement("link");
+    cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/panel.css"; 
+    cssLink.rel = "stylesheet"; 
+    cssLink.type = "text/css"; 
+    document.head.appendChild(cssLink);
+                
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(".panel-container{ height: " + (100/panelConfigs.length) + "%; }"));
+    document.head.appendChild(style);
+}
+
+function addPostStyle()
+{
+    var iframes = document.getElementsByTagName("iframe");
+    for( var i = 0; i < iframes.length; i++ )
     {
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-            var r = Math.random()*16|0, v = c === "x" ? r : (r&0x3|0x8);
-            return v.toString(16);
-        });
+        iframes[i].onload = function() {
+            var cssLink = this.contentWindow.document.createElement("link");
+            cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
+            cssLink.rel = "stylesheet"; 
+            cssLink.type = "text/css"; 
+            this.contentWindow.document.head.appendChild(cssLink);
+        };
+    }
+}
+
+function createGuid()
+{
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c === "x" ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+}
+
+function addGrafanaPanel(uniqueId, params) {
+    if (uniqueId === undefined) {
+        uniqueId = createGuid();
     }
 
-    function addGrafanaPanel(uniqueId, params) {
-        if (uniqueId === undefined) {
-            uniqueId = createGuid();
-        }
+    var div = document.createElement("div");
+    div.id = "panel-" + uniqueId + "-container";
+    div.className = "panel-container";
+    document.body.appendChild(div);
 
-        var div = document.createElement("div");
-        div.id = "panel-" + uniqueId + "-container";
-        div.className = "panel-container";
-        document.body.appendChild(div);
+    var frame = document.createElement("iframe");
+    frame.id = "panel-" + uniqueId + "-frame";
+    frame.className = "panel-frame";
+    frame.scrolling = "no";
+    div.appendChild(frame);
 
-        var frame = document.createElement("iframe");
-        frame.id = "panel-" + uniqueId + "-frame";
-        frame.className = "panel-frame";
-        frame.scrolling = "no";
-        div.appendChild(frame);
-
-        if (params === undefined) {
-            params = {};
-        }
-
-        params.frame = frame.id;
-
-        var panel = new GrafanaPanel(params);
-        grafanaPanels.push(panel);
+    if (params === undefined) {
+        params = {};
     }
+
+    params.frame = frame.id;
+
+    var panel = new GrafanaPanel(params);
+    grafanaPanels.push(panel);
 }

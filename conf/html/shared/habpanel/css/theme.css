@@ -523,6 +523,7 @@ body,
     line-height: var(--widget-value-main-sub-size);
     color: var(--widget-value-color);
     margin: 0px 0px 0px 5px;
+    text-align: right;
 }
 .mvWidget.mvItemValue .column .top .icon {
     width: var(--widget-value-main-icon-size);
