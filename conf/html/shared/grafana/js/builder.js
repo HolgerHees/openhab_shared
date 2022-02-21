@@ -67,17 +67,9 @@ function queryParams(param) {
     return result;
 }
 
-var
-    urlParams = queryParams(window.location),
-    parentUrlParams = queryParams(window.parent.location.href);
-
 function resolveParam(params, name) {
     if (params !== undefined && params[name] !== undefined) {
         return params[name];
-    } else if (urlParams !== undefined && urlParams[name] !== undefined) {
-        return urlParams[name];
-    } else if (parentUrlParams !== undefined && parentUrlParams[name] !== undefined) {
-        return parentUrlParams[name];
     } else {
         return SMARTHOME_GRAFANA_DEFAULTS[name];
     }
@@ -370,6 +362,11 @@ function GrafanaPanel(params) {
                 firstParameter = false;
             }
         }
+        
+        console.log(params);
+        console.log(p);
+        console.log(urlVars);
+        console.log(url);
 
         if (render === "true") {
             // append cache busting parameter
@@ -464,26 +461,6 @@ function GrafanaPanel(params) {
 
 var grafanaPanels = [];
 
-function GrafanaBuilderCustom(panelConfigs)
-{
-    var theme = getGrafanaTheme();
-
-    var timeRange;
-    
-    addPreStyle(panelConfigs);
-    
-    for( var i = 0; i < panelConfigs.length; i++ )
-    {
-        let params = { dashboard: panelConfigs[i][1], theme: theme, panel: panelConfigs[i][2] }
-        for( let [key, value] of Object.entries(panelConfigs[i][3]) )
-        {
-            params[key] = value;
-        }
-        addGrafanaPanel( panelConfigs[i][0], params );
-    }
-
-    addPostStyle();
-}
 function GrafanaBuilder(panelConfigs) 
 {
     var theme = getGrafanaTheme();
@@ -492,50 +469,63 @@ function GrafanaBuilder(panelConfigs)
     
     addPreStyle(panelConfigs);
     
-    smartHomeSubscriber.addItemListener(getFromItem(),function(item,state)
+    let urlParams = queryParams(window.location);
+    let fromItem = "fromItem" in urlParams ? urlParams["fromItem"] : null;
+    
+    if( fromItem )
     {
-        switch (state) {
-            case "HOUR": 
-                timeRange = "now-1h";
-                break;
-            case "DAY":
-                timeRange = "now-1d";
-                break;
-            default: 
-            case "WEEK":
-                timeRange = "now-1w";
-                break;
-            case "MONTH":
-                timeRange = "now-1M";
-                break;
-            case "YEAR":
-                timeRange = "now-1y";
-                break;
-            case "5YEARS":
-                timeRange = "now-5y";
-                break;
-        }
-    });   
+        smartHomeSubscriber.addItemListener(fromItem,function(item,state)
+        {
+            switch (state) {
+                case "HOUR": 
+                    timeRange = "now-1h";
+                    break;
+                case "DAY":
+                    timeRange = "now-1d";
+                    break;
+                default: 
+                case "WEEK":
+                    timeRange = "now-1w";
+                    break;
+                case "MONTH":
+                    timeRange = "now-1M";
+                    break;
+                case "YEAR":
+                    timeRange = "now-1y";
+                    break;
+                case "5YEARS":
+                    timeRange = "now-5y";
+                    break;
+            }
+        });   
+    }
     
     for( var i = 0; i < panelConfigs.length; i++ )
     {
-        let panel = [ panelConfigs[i][2], panelConfigs[i][3], panelConfigs[i][4] ];
-    
-        let panelItemFunction = function(value)
-        { 
-            return getPanel(panel) 
-        }
+        if( panelConfigs[i].length > 4 )
+        {
+            let panel = [ panelConfigs[i][2], panelConfigs[i][3], panelConfigs[i][4] ];
         
-        addGrafanaPanel( panelConfigs[i][0], { dashboard: panelConfigs[i][1], theme: theme, panelItem: getFromItem(), panelItemFunction: panelItemFunction, fromItem: getFromItem(), fromItemFunction: getTimerange } );
+            let panelItemFunction = function(value)
+            { 
+                return getPanel(panel) 
+            }
+            
+            addGrafanaPanel( panelConfigs[i][0], { dashboard: panelConfigs[i][1], theme: theme, panelItem: fromItem, panelItemFunction: panelItemFunction, fromItem: fromItem, fromItemFunction: getTimerange } );
+        }
+        else
+        {
+            let params = { dashboard: panelConfigs[i][1], theme: theme, panel: panelConfigs[i][2] }
+            for( let [key, value] of Object.entries(panelConfigs[i][3]) )
+            {
+                params[key] = value;
+            }
+            addGrafanaPanel( panelConfigs[i][0], params );
+        }
     }
 
     addPostStyle();
     
-    function getFromItem()
-    {
-        return resolveParam({}, "fromItem");
-    }
-
     function getTimerange(value)
     {
         return timeRange;
