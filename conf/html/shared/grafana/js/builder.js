@@ -13,6 +13,7 @@ if( auth_type != 'fa-' && auth_type != 'ba-' ) auth_type = "";
 var domain = domainParts.join(".");
 
 var SUBSCRIPTION_URL = "/rest/events?topics=openhab/items/*/statechanged";
+var REST_URL = "/rest/items/";
 
 var SMARTHOME_GRAFANA_DEFAULTS = {
     // library
@@ -151,7 +152,7 @@ function SmartHomeSubscriber(params)
         let itemNames = uninitializedItemNames();
         for( let i = 0; i < itemNames.length; i++ )
         {
-            ajax("/rest/items/" + itemNames[i], valueHandler );
+            ajax(REST_URL + itemNames[i], valueHandler );
         }
 
         updateInitialized();
