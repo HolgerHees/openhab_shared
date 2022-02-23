@@ -1,18 +1,8 @@
 /**
- * SmartHome Grafana panel utilities
- *
- * Updates the source URL of Grafana <iframe> panels using Eclipse SmartHome server side events (SSE).
- * SmartHomeSubscriber is based on the javascript of the Eclipse SmartHome Basic UI by Vlad Ivanov.
- *
- * @author Wouter Born
  * @author Holger Hees
+ * 
+ * inspired by https://github.com/wborn/openhab-grafana
  */
-
-/* exported addGrafanaPanel, GrafanaPanel */
-/* eslint-env browser */
-/* eslint no-undef:2 */
-/* eslint no-new:0 */
-/* eslint no-underscore-dangle:0 */
 
 "use strict";
 
@@ -21,6 +11,8 @@ var subDomain = domainParts.shift();
 var auth_type = subDomain.substring(0,3);
 if( auth_type != 'fa-' && auth_type != 'ba-' ) auth_type = "";
 var domain = domainParts.join(".");
+
+var SUBSCRIPTION_URL = "/rest/events?topics=openhab/items/*/statechanged";
 
 var SMARTHOME_GRAFANA_DEFAULTS = {
     // library
@@ -42,215 +34,132 @@ var SMARTHOME_GRAFANA_DEFAULTS = {
     height: "auto"
 };
 
-function queryParams(param) {
-
-    if (!param) {
-        return {};
-    }
-
-    var
-        match,
-        url = param.toString(),
-        queryIndex = url.indexOf("?"),
-        query = queryIndex !== -1 ? url.substring(queryIndex + 1) : "",
-        re = /([^&=]+)=?([^&]*)/g,
-        decode = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")); },
-        result = {};
-
-    do {
-        match = re.exec(query);
-        if (match) {
-           result[decode(match[1])] = decode(match[2]);
-        }
-    } while (match);
-
-    return result;
+function resolveParam(params, name)
+{
+    return params !== undefined && params[name] !== undefined ? params[name] : SMARTHOME_GRAFANA_DEFAULTS[name];
 }
 
-function resolveParam(params, name) {
-    if (params !== undefined && params[name] !== undefined) {
-        return params[name];
-    } else {
-        return SMARTHOME_GRAFANA_DEFAULTS[name];
-    }
-}
+function SmartHomeSubscriber(params) 
+{
+    let p = params;
+    let initialized = false;
+    let initializedListeners = [];
+    let items = {};
+    let subscription = {
+        id: "",
+        page: resolveParam(params, "w"),
+        sitemap: resolveParam(params, "sitemap")
+    };
+    
+    function ajax(url,callback) 
+    {
+        let request = new XMLHttpRequest();
 
-function SmartHomeSubscriber(params) {
+        request.open("GET", url, true);
 
-    var
-        p = params,
-        initialized = false,
-        initializedListeners = [],
-        items = {},
-        subscription = {
-            id: "",
-            page: resolveParam(p, "w"),
-            sitemap: resolveParam(p, "sitemap")
-        };
-
-    this.addItemListener = function(itemName, listener) {
-        if (typeof listener !== "function") {
-            throw new Error("addItemListener 'listener' is not a function");
-        }
-        
-        if (items[itemName] !== undefined) {
-            if( !items[itemName].listeners.includes(listener) )
+        request.onload = function() 
+        {
+            if( request.status < 200 || request.status > 400 )
             {
-                items[itemName].listeners.push(listener);
-            }
-        } else {
-            items[itemName] = {listeners: [listener], value: undefined};
-        }
-    };
-
-    this.addInitializedListener = function(listener) {
-        if (typeof listener !== "function") {
-            throw new Error("addInitializedListener 'listener' is not a function");
-        }
-        initializedListeners.push(listener);
-    };
-
-    this.isInitialized = function() {
-        return initialized;
-    };
-
-    function ajax(params) {
-        var
-            p = params,
-            type = typeof p.type !== "undefined" ? p.type : "GET",
-            data = typeof p.data !== "undefined" ? p.data : "",
-            headers = typeof p.headers !== "undefined" ? p.headers : {},
-            request = new XMLHttpRequest();
-
-        request.open(type, p.url, true);
-
-        for (var h in headers) {
-            request.setRequestHeader(h, headers[h]);
-        }
-
-        request.onload = function() {
-            if (request.status < 200 || request.status > 400) {
-                if (typeof p.error === "function") {
-                    p.error(request);
-                }
                 return;
             }
-            if (typeof p.callback === "function") {
-                p.callback(request);
-            }
+            callback(request);
         };
-        request.onerror = function() {
-            if (typeof p.error === "function") {
-                p.error(request);
-            }
-        };
-        request.send(data);
+        request.send();
 
         return request;
     }
 
-    function uninitializedItemNames() {
-        var result = [];
-        for (var itemName in items) {
-            if (items[itemName].value === undefined) {
+    function uninitializedItemNames()
+    {
+        let result = [];
+        for( let itemName in items )
+        {
+            if( items[itemName].value === undefined )
+            {
                 result.push(itemName);
             }
         }
         return result;
     }
 
-    function areAllItemsInitialized() {
-        return uninitializedItemNames().length === 0;
-    }
-
-    function updateInitialized() {
-        if (!initialized && areAllItemsInitialized()) {
+    function updateInitialized() 
+    {
+        if( !initialized && uninitializedItemNames().length === 0 )
+        {
             initialized = true;
-            for (var i = 0; i < initializedListeners.length; i++) {
+            for( let i = 0; i < initializedListeners.length; i++ )
+            {
                 initializedListeners[i]();
             }
         }
     }
 
-    function updateItem(itemName, value) {
-
-        if (items[itemName].value === value) {
-            return;
-        }
+    function updateItem(itemName, value) 
+    {
+        if( items[itemName].value === value ) return;
 
         items[itemName].value = value;
 
-        var itemListeners = items[itemName].listeners;
-        for (var i = 0; i < itemListeners.length; i++) {
-            var listener = itemListeners[i];
+        let itemListeners = items[itemName].listeners;
+        for( let i = 0; i < itemListeners.length; i++ )
+        {
+            let listener = itemListeners[i];
             listener(itemName, value);
         }
 
         updateInitialized();
     }
 
-    function ChangeListener() {
-        
-        var subscribeLocation = "/rest/events?topics=openhab/items/*/statechanged";
-        
-        var _t = this;
+    function ChangeListener() 
+    {
+        let source = new EventSource(SUBSCRIPTION_URL);
+        source.addEventListener("message", function(payload) 
+        {
+            let data = JSON.parse(payload.data);
             
-        _t.navigate = function(){};
-        _t.source = new EventSource(subscribeLocation);
-        _t.source.addEventListener("message", function(payload) {
-            if (_t.paused) {
-                return;
-            }
-
-            var data = JSON.parse(payload.data);
-            
-            var itemName = data.topic.substr(14);
+            let itemName = data.topic.substr(14);
 
             itemName = itemName.substr(0,itemName.indexOf("/"));
 
-            var payload = JSON.parse(data.payload);
+            let data_payload = JSON.parse(data.payload);
 
-            if (items[itemName] === undefined) {
-                return;
-            }
+            if( items[itemName] === undefined ) return;
             
-            updateItem(itemName, payload.value);
+            updateItem(itemName, data_payload.value);
         });
     }
 
-    function ValuesInitializer() {
-        var
-            _t = this;
+    function ValuesInitializer() 
+    {
+        function valueHandler(response) 
+        {
+            let responseJSON;
 
-        _t.valueHandler = function(response) {
-            var
-                responseJSON;
-
-            try {
+            try 
+            {
                 responseJSON = JSON.parse(response.responseText);
-            } catch (e) {
+            }
+            catch( e )
+            {
                 return;
             }
 
             updateItem(responseJSON.name, responseJSON.state);
         };
 
-        var itemNames = uninitializedItemNames();
-        for (var i = 0; i < itemNames.length; i++) {
-            ajax({
-                url: "/rest/items/" + itemNames[i],
-                type: "GET",
-                callback: _t.valueHandler
-            });
+        let itemNames = uninitializedItemNames();
+        for( let i = 0; i < itemNames.length; i++ )
+        {
+            ajax("/rest/items/" + itemNames[i], valueHandler );
         }
 
         updateInitialized();
     }
 
-    function initialize() {
-        if (subscription.page === undefined) {
-            subscription.page = subscription.sitemap;
-        }
+    function initialize() 
+    {
+        if( subscription.page === undefined ) subscription.page = subscription.sitemap;
 
         document.addEventListener("DOMContentLoaded", function() {
             subscription.valuesInitializer = new ValuesInitializer();
@@ -259,82 +168,87 @@ function SmartHomeSubscriber(params) {
     }
 
     initialize();
+
+    return {
+        addItemListener: function(itemName, listener)
+        {
+            if( items[itemName] !== undefined )
+            {
+                if( !items[itemName].listeners.includes(listener) )
+                {
+                    items[itemName].listeners.push(listener);
+                }
+            }
+            else
+            {
+                items[itemName] = {listeners: [listener], value: undefined};
+            }
+        },
+        addInitializedListener: function(listener) 
+        {
+            initializedListeners.push(listener);
+        },
+        isInitialized: function()
+        {
+            return initialized;
+        }
+    };
 }
 
 var smartHomeSubscriber = new SmartHomeSubscriber();
 
-function GrafanaPanel(params) {
-
-    var
-        p = params,
-        refreshTimerId = undefined,
-        resizeTimerId = undefined,
-        frame = resolveParam(p, "frame"),
-        urlPrefix = resolveParam(p, "urlPrefix"),
-        panelPath = resolveParam(p, "panelPath"),
-        renderPanelPath = resolveParam(p, "renderPanelPath"),
-        libVars = {
-            debug: {
-                value: resolveParam(p, "debug"),
-                itemName: resolveParam(p, "debugItem"),
-                itemFunction: params.debugItemFunction
-            },
-            render: {
-                value: resolveParam(p, "render"),
-                itemName: resolveParam(p, "renderItem"),
-                itemFunction: params.renderItemFunction
-            },
-            refresh: {
-                value: resolveParam(p, "refresh"),
-                itemName: resolveParam(p, "refreshItem"),
-                itemFunction: params.refreshItemFunction
-            }
+function GrafanaPanel(params) 
+{
+    let initialized = false;
+    let refreshTimerId = null;
+    let resizeTimerId = null;
+    let frame = resolveParam(params, "frame");
+    let urlPrefix = resolveParam(params, "urlPrefix");
+    let panelPath = resolveParam(params, "panelPath");
+    let renderPanelPath = resolveParam(params, "renderPanelPath");
+    let libVars = {
+        debug: {
+            value: resolveParam(params, "debug")
         },
-        urlVars = {
-            dashboard: {
-                value: resolveParam(p, "dashboard"),
-                itemName: resolveParam(p, "dashboardItem"),
-                itemFunction: params.dashboardItemFunction
-            },
-            from: {
-                key: "from",
-                value: resolveParam(p, "from"),
-                itemName: resolveParam(p, "fromItem"),
-                itemFunction: params.fromItemFunction
-            },
-            to: {
-                key: "to",
-                value: resolveParam(p, "to"),
-                itemName: resolveParam(p, "toItem"),
-                itemFunction: params.toItemFunction
-            },
-            panel: {
-                key: "panelId",
-                value: resolveParam(p, "panel"),
-                itemName: resolveParam(p, "panelItem"),
-                itemFunction: params.panelItemFunction
-            },
-            theme: {
-                key: "theme",
-                value: resolveParam(p, "theme"),
-                itemName: resolveParam(p, "themeItem"),
-                itemFunction: params.themeItemFunction
-            },
-            width: {
-                key: "width",
-                value: resolveParam(p, "width"),
-                itemName: resolveParam(p, "widthItem"),
-                itemFunction: params.widthItemFunction
-            },
-            height: {
-                key: "height",
-                value: resolveParam(p, "height"),
-                itemName: resolveParam(p, "heightItem"),
-                itemFunction: params.heightItemFunction
-            }
-        };
+        render: {
+            value: resolveParam(params, "render")
+        },
+        refresh: {
+            value: resolveParam(params, "refresh")
+        }
+    };
+    let urlVars = {
+        dashboard: {
+            value: resolveParam(params, "dashboard")
+        },
+        from: {
+            key: "from",
+            value: resolveParam(params, "from")
+        },
+        to: {
+            key: "to",
+            value: resolveParam(params, "to")
+        },
+        panel: {
+            key: "panelId",
+            value: resolveParam(params, "panel")
+        },
+        theme: {
+            key: "theme",
+            value: resolveParam(params, "theme")
+        },
+        width: {
+            key: "width",
+            value: resolveParam(params, "width")
+        },
+        height: {
+            key: "height",
+            value: resolveParam(params, "height")
+        }
+    };
 
-    function updateFrameSourceURL() {
+    function updateFrameSourceURL() 
+    {
         var debug = libVars.debug.value;
         var render = libVars.render.value;
         var refresh = libVars.refresh.value;
@@ -347,171 +261,146 @@ function GrafanaPanel(params) {
         url += urlVars.dashboard.value;
 
         var firstParameter = true;
-        for (var uvKey in urlVars) {
+        for( var uvKey in urlVars ) 
+        {
             var key = urlVars[uvKey].key;
             var value = urlVars[uvKey].value;
 
-            if (key === "width") {
+            if( key === "width" ) 
+            {
                 value = render === "false" ? undefined : (value === "auto" ? idocument.body.clientWidth : value);
-            } else if (key === "height") {
+            }
+            else if( key === "height" ) 
+            {
                 value = render === "false" ? undefined : (value === "auto" ? idocument.body.clientHeight : value);
             }
 
-            if (key !== undefined && value !== undefined) {
+            if( key !== undefined && value !== undefined ) 
+            {
                 url += (firstParameter ? "?" : "&") + key + "=" + value;
                 firstParameter = false;
             }
         }
         
-        console.log(params);
-        console.log(p);
-        console.log(urlVars);
-        console.log(url);
-
-        if (render === "true") {
+        if( render === "true" ) 
+        {
             // append cache busting parameter
             url += "&cacheBuster=" + Date.now();
         }
         // update frame content
-        if (debug === "true") {
+        if( debug === "true" )
+        {
             idocument.open();
             idocument.write("<a href=\"" + url + "\">" + url + "</a>");
             idocument.close();
-        } else if (render === "true") {
+        }
+        else if( render === "true" )
+        {
             var htmlUrl = url.replace(renderPanelPath, panelPath);
             idocument.open();
             idocument.write("<style>body{margin:0px}p{margin:0px}</style>");
             idocument.write("<p style=\"text-align:center;\"><a href=\"" + htmlUrl + "\"><img src=\"" + url + "\"></a></p>");
             idocument.close();
-        } else if (document.getElementById(frame).src !== url) {
+        }
+        else if( document.getElementById(frame).src !== url )
+        {
             // replace the URL so changes are not added to the browser history
             iframe.contentWindow.location.replace(url);
         }
 
-        // schedule/cancel rendered image refresh
-        if (render === "true" && refresh > 0) {
-            clearTimeout(refreshTimerId);
+        if( render === "true" && refresh > 0 ) 
+        {
             refreshTimerId = setTimeout(updateFrameSourceURL, refresh);
-        } else if (refreshTimerId !== undefined) {
-            clearTimeout(refreshTimerId);
         }
     }
 
-    function updateFrameOnResize() {
-        if (libVars.render.value === "true" && (urlVars.width.value === "auto" || urlVars.height.value === "auto")) {
-            clearTimeout(resizeTimerId);
+    function updateFrameOnResize() 
+    {
+        clearTimeout(resizeTimerId);
+        if( libVars.render.value === "true" && ( urlVars.width.value === "auto" || urlVars.height.value === "auto" ) ) 
+        {
             resizeTimerId = setTimeout(updateFrameSourceURL, 500);
-        } else {
-            clearTimeout(resizeTimerId);
+        } 
+    }
+    
+    function updateVars(vars)
+    {
+        for( let [key, value] of Object.entries(vars) )
+        {
+            urlVars[key].value = value;
         }
     }
 
-    function updateVarsOnItemUpdate(vars, itemName, value) {
-        for (var key in vars) {
-            if (vars[key].itemName !== undefined && vars[key].itemName === itemName) {
-                if (vars[key].itemFunction) {
-                    value = vars[key].itemFunction(value);
-                }
-                vars[key].value = value;
-            }
-        }
-    }
-
-    function onItemUpdated(itemName, value) {
-        updateVarsOnItemUpdate(libVars, itemName, value);
-        updateVarsOnItemUpdate(urlVars, itemName, value);
-
-        if (smartHomeSubscriber.isInitialized()) {
+    return {
+        show: function(params)
+        {
+            if( params ) updateVars(params);
             updateFrameSourceURL();
-        }
-    }
-
-    function assertPropertyDefined(name, value) {
-        if (value === undefined) {
-            throw new Error("Property '" + name + "' is undefined");
-        }
-    }
-
-    function assertVarsDefinedOrSubscribeToESH(vars) {
-        for (var key in vars) {
-            var itemName = vars[key].itemName;
-            if (itemName !== undefined) {
-                smartHomeSubscriber.addItemListener(itemName, onItemUpdated);
-            } else if (vars[key].value === undefined) {
-                throw new Error("Property '" + key + "' requires a default value or itemName to obtain the value from");
+            if( !initialized && libVars.render.value === "true" && ( urlVars.width.value === "auto" || urlVars.height.value === "auto" ) )
+            {
+                initialized = true;
+                window.addEventListener("resize", updateFrameOnResize);
             }
-        }
+        },
     }
-
-    function initialize() {
-        assertPropertyDefined("frame", frame);
-        assertPropertyDefined("urlPrefix", urlPrefix);
-        assertPropertyDefined("panelPath", panelPath);
-        assertPropertyDefined("renderPanelPath", renderPanelPath);
-
-        assertVarsDefinedOrSubscribeToESH(libVars);
-        assertVarsDefinedOrSubscribeToESH(urlVars);
-
-        smartHomeSubscriber.addInitializedListener(updateFrameSourceURL);
-        window.addEventListener("resize", updateFrameOnResize);
-    }
-
-    initialize();
 }
-
-var grafanaPanels = [];
 
 function GrafanaBuilder(panelConfigs) 
 {
     var theme = getGrafanaTheme();
 
-    var timeRange;
-    
     addPreStyle(panelConfigs);
     
     let urlParams = queryParams(window.location);
     let fromItem = "fromItem" in urlParams ? urlParams["fromItem"] : null;
     
-    if( fromItem )
-    {
-        smartHomeSubscriber.addItemListener(fromItem,function(item,state)
-        {
-            switch (state) {
-                case "HOUR": 
-                    timeRange = "now-1h";
-                    break;
-                case "DAY":
-                    timeRange = "now-1d";
-                    break;
-                default: 
-                case "WEEK":
-                    timeRange = "now-1w";
-                    break;
-                case "MONTH":
-                    timeRange = "now-1M";
-                    break;
-                case "YEAR":
-                    timeRange = "now-1y";
-                    break;
-                case "5YEARS":
-                    timeRange = "now-5y";
-                    break;
-            }
-        });   
-    }
-    
     for( var i = 0; i < panelConfigs.length; i++ )
     {
         if( panelConfigs[i].length > 4 )
         {
-            let panel = [ panelConfigs[i][2], panelConfigs[i][3], panelConfigs[i][4] ];
-        
-            let panelItemFunction = function(value)
-            { 
-                return getPanel(panel) 
-            }
+            let params = { dashboard: panelConfigs[i][1], theme: theme };
+            let panel = addGrafanaPanel( panelConfigs[i][0], params );
+            smartHomeSubscriber.addItemListener(fromItem,function(item,state)
+            {
+                //console.log("itemValue");
+                
+                let fromValue = null;
+                let panelId = null;
+                switch (state) {
+                    case "HOUR": 
+                        fromValue = "now-1h";
+                        panelId = this[1][0];
+                        break;
+                    case "DAY":
+                        fromValue = "now-1d";
+                        panelId = this[1][0];
+                        break;
+                    case "WEEK":
+                        fromValue = "now-1w";
+                        panelId = this[1][1];
+                        break;
+                    case "MONTH":
+                        fromValue = "now-1M";
+                        panelId = this[1][1];
+                        break;
+                    case "YEAR":
+                        fromValue = "now-1y";
+                        panelId = this[1][2];
+                        break;
+                    case "5YEARS":
+                        fromValue = "now-5y";
+                        panelId = this[1][2];
+                        break;
+                }
+                
+                let params = {};
+                params["panel"] = panelId;
+                params["from"] = fromValue;
+                this[0].show(params);
+            }.bind([panel,[ panelConfigs[i][2], panelConfigs[i][3], panelConfigs[i][4] ]]));
             
-            addGrafanaPanel( panelConfigs[i][0], { dashboard: panelConfigs[i][1], theme: theme, panelItem: fromItem, panelItemFunction: panelItemFunction, fromItem: fromItem, fromItemFunction: getTimerange } );
+            /*smartHomeSubscriber.addInitializedListener(function(){
+            }.bind([panel,panels]));*/
         }
         else
         {
@@ -520,92 +409,88 @@ function GrafanaBuilder(panelConfigs)
             {
                 params[key] = value;
             }
-            addGrafanaPanel( panelConfigs[i][0], params );
+            let panel = addGrafanaPanel( panelConfigs[i][0], params );
+            panel.show();
         }
     }
-
-    addPostStyle();
     
-    function getTimerange(value)
+    function getGrafanaTheme()
     {
-        return timeRange;
+        var isPhone = ( navigator.userAgent.indexOf("Android") != -1 && navigator.userAgent.indexOf("Mobile") != -1 );
+        return isPhone || parent.document.location.pathname.includes("habpanel") ? 'dark' : 'light';
     }
 
-    function getPanel(panel)
+    function addPreStyle(panelConfigs)
     {
-        if( timeRange == "now-1h" || timeRange == "now-1d" ) return panel[0];
-        
-        if( timeRange == "now-1w" || timeRange == "now-1M" ) return panel[1];
-        
-        return panel[2];
+        var cssLink = document.createElement("link");
+        cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/panel.css"; 
+        cssLink.rel = "stylesheet"; 
+        cssLink.type = "text/css"; 
+        document.head.appendChild(cssLink);
+                    
+        var style = document.createElement('style');
+        style.type = 'text/css';
+        style.appendChild(document.createTextNode(".panel-container{ height: " + (100/panelConfigs.length) + "%; }"));
+        document.head.appendChild(style);
     }
-}
 
-function getGrafanaTheme()
-{
-    var isPhone = ( navigator.userAgent.indexOf("Android") != -1 && navigator.userAgent.indexOf("Mobile") != -1 );
-    return isPhone || parent.document.location.pathname.includes("habpanel") ? 'dark' : 'light';
-}
-
-function addPreStyle(panelConfigs)
-{
-    var cssLink = document.createElement("link");
-    cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/panel.css"; 
-    cssLink.rel = "stylesheet"; 
-    cssLink.type = "text/css"; 
-    document.head.appendChild(cssLink);
-                
-    var style = document.createElement('style');
-    style.type = 'text/css';
-    style.appendChild(document.createTextNode(".panel-container{ height: " + (100/panelConfigs.length) + "%; }"));
-    document.head.appendChild(style);
-}
-
-function addPostStyle()
-{
-    var iframes = document.getElementsByTagName("iframe");
-    for( var i = 0; i < iframes.length; i++ )
+    function createGuid()
     {
-        iframes[i].onload = function() {
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c === "x" ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
+    }
+
+    function addGrafanaPanel(uniqueId, params) 
+    {
+        if (uniqueId === undefined) uniqueId = createGuid();
+
+        var div = document.createElement("div");
+        div.id = "panel-" + uniqueId + "-container";
+        div.className = "panel-container";
+        document.body.appendChild(div);
+
+        var frame = document.createElement("iframe");
+        frame.id = "panel-" + uniqueId + "-frame";
+        frame.className = "panel-frame";
+        frame.scrolling = "no";
+        frame.onload = function() 
+        {
             var cssLink = this.contentWindow.document.createElement("link");
             cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
             cssLink.rel = "stylesheet"; 
             cssLink.type = "text/css"; 
             this.contentWindow.document.head.appendChild(cssLink);
         };
+        div.appendChild(frame);
+
+        params["frame"] = frame.id;
+        return new GrafanaPanel(params);
     }
-}
+    
+    function queryParams(param) 
+    {
+        if( !param )  return {};
 
-function createGuid()
-{
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-        var r = Math.random()*16|0, v = c === "x" ? r : (r&0x3|0x8);
-        return v.toString(16);
-    });
-}
+        let match = null;
+        let url = param.toString();
+        let queryIndex = url.indexOf("?");
+        let query = queryIndex !== -1 ? url.substring(queryIndex + 1) : "";
+        let re = /([^&=]+)=?([^&]*)/g;
+        let decode = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")); };
+        let result = {};
 
-function addGrafanaPanel(uniqueId, params) {
-    if (uniqueId === undefined) {
-        uniqueId = createGuid();
+        do 
+        {
+            match = re.exec(query);
+            if( match ) 
+            {
+                result[decode(match[1])] = decode(match[2]);
+            }
+        } 
+        while( match );
+
+        return result;
     }
-
-    var div = document.createElement("div");
-    div.id = "panel-" + uniqueId + "-container";
-    div.className = "panel-container";
-    document.body.appendChild(div);
-
-    var frame = document.createElement("iframe");
-    frame.id = "panel-" + uniqueId + "-frame";
-    frame.className = "panel-frame";
-    frame.scrolling = "no";
-    div.appendChild(frame);
-
-    if (params === undefined) {
-        params = {};
-    }
-
-    params.frame = frame.id;
-
-    var panel = new GrafanaPanel(params);
-    grafanaPanels.push(panel);
 }
