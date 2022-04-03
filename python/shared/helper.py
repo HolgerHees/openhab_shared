@@ -21,12 +21,16 @@ from org.openhab.core.types import UnDefType
 from org.openhab.core.persistence.extensions import PersistenceExtensions
 from org.openhab.core.thing import ChannelUID, ThingUID
 
-from shared.jsr223 import scope    
+from shared.jsr223 import scope
 from shared.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
+from shared.services import get_service
 
 from configuration import LOG_PREFIX, allTelegramBots, allTelegramAdminBots
 
 log = LoggerFactory.getLogger(LOG_PREFIX)
+
+LOCATION_PROVIDER = get_service("org.openhab.core.i18n.LocaleProvider")
+language          = LOCATION_PROVIDER.getLocale().getLanguage()
 
 actions           = scope.get("actions")
 
@@ -47,10 +51,10 @@ class rule(object):
     def __init__(self, name,profile=None):
         self.name = name
         self.profile = profile
-        
+
     def __call__(self, clazz):
         proxy = self
-        
+
         filePackage = proxy.getFilePackage(proxy.name)
         classPackage = proxy.getClassPackage(clazz.__name__)
 
@@ -73,16 +77,16 @@ class rule(object):
 
         subclass = type(clazz.__name__, (clazz, SimpleRule), dict(__init__=init))
         subclass.execute = proxy.executeWrapper(clazz.execute)
-        
+
         #subclass.log = logging.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
         subclass.log = LoggerFactory.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
 
         automationManager.addRule(subclass())
 
         subclass.log.debug("Rule initialised")
-        
+
         return subclass
-    
+
     def getFilePackage(self,fileName):
         if fileName.endswith(".py"):
             filePackage = fileName[:-3]
@@ -97,9 +101,9 @@ class rule(object):
         else:
             classPackage = className
         return classPackage
-    
+
     def set_uid_prefix(self, rule, className, fileName):
-        
+
         try:
             uid_field = type(SmarthomeRule).getClass(SmarthomeRule).getDeclaredField(SmarthomeRule, "uid")
         except NoSuchFieldException:
@@ -114,7 +118,7 @@ class rule(object):
 
     def executeWrapper(self,func):
         proxy = self
-        
+
         def appendDetailInfo(self,event):
             if event is not None:
                 if event.getType().startswith("Item"):
@@ -128,7 +132,7 @@ class rule(object):
             return ""
 
         def func_wrapper(self, module, input):
-            
+
             try:
                 event = input['event']
                 # *** Filter indirect events out (like for groups related to the configured item)
@@ -137,17 +141,17 @@ class rule(object):
                     return
             except KeyError:
                 event = None
-            
+
             try:
                 start_time = time.clock()
-                
+
                 # *** execute
                 if proxy.profile:
                     pr = profile.Profile()
 
                     #self.log.debug(str(getItem("Lights")))
                     #pr.enable()
-                    pr.runctx('func(self, module, input)', {'self': self, 'module': module, 'input': input, 'func': func }, {})              
+                    pr.runctx('func(self, module, input)', {'self': self, 'module': module, 'input': input, 'func': func }, {})
                     status = None
                 else:
                     status = func(self, module, input)
@@ -166,7 +170,7 @@ class rule(object):
                     msg = "Rule executed in " + "{:6.1f}".format(elapsed_time) + " ms" + appendDetailInfo(self,event)
 
                     self.log.debug(msg)
-                
+
             except NotInitialisedException as e:
                 self.log.warn("Rule skipped: " + str(e))
             except:
@@ -182,12 +186,12 @@ def startTimer(log, duration, callback, args=[], kwargs={}, oldTimer = None, gro
     if oldTimer != None:
         oldTimer.cancel()
         groupCount = oldTimer.groupCount
-            
+
     groupCount = groupCount - 1
-    
+
     if groupCount == 0:
         callback(*args, **kwargs)
-        
+
         return None
 
     timer = createTimer(log, duration, callback, args, kwargs )
@@ -202,25 +206,25 @@ class createTimer:
         self.callback = callback
         self.args = args
         self.kwargs = kwargs
-        
+
         self.timer = threading.Timer(duration, self.handler)
         #log.info(str(self.timer))
-        
+
     def handler(self):
         try:
             self.callback(*self.args, **self.kwargs)
         except:
             self.log.error(u"{}".format(traceback.format_exc()))
             raise
-          
+
     def start(self):
         if not self.timer.isAlive():
             #log.info("timer started")
-            self.timer.start() 
+            self.timer.start()
         else:
             #log.info("timer already started")
             pass
-        
+
     def cancel(self):
         if self.timer.isAlive():
             #log.info("timer stopped")
@@ -308,7 +312,7 @@ def getItemStateWithFallback(itemOrName,fallback):
     if isinstance(state,UnDefType) and fallback is not None:
         state = fallback
     return state
-  
+
 def getItemState(itemOrName):
     name = _getItemName(itemOrName)
     state = items.get(name)
@@ -421,7 +425,7 @@ def getItemLastChange(itemOrName):
     return lastChange
 
 def getStableMinMaxItemState( now, itemName, checkTimeRange ):
-        
+
     currentEndTime = now
     minTime = currentEndTime.minusMinutes( checkTimeRange )
 
@@ -435,7 +439,7 @@ def getStableMinMaxItemState( now, itemName, checkTimeRange ):
     item = getItem(itemName)
 
     entry = getHistoricItemEntry(item, now)
-    
+
     while True:
         currentStartTime = entry.getTimestamp()
 
@@ -460,15 +464,15 @@ def getStableMinMaxItemState( now, itemName, checkTimeRange ):
             break
 
         entry = getHistoricItemEntry(item, currentEndTime )
-        
+
     value = ( value / duration )
 
     return [ value, minValue, maxValue ]
 
 def getStableItemState( now, itemName, checkTimeRange ):
-        
+
     value, _, _ = getStableMinMaxItemState(now,itemName, checkTimeRange)
-        
+
     return value
 
 # *** Notifications ***
@@ -478,7 +482,7 @@ def sendNotification(header, message, url=None, recipients = None):
     }
     for k,v in chars.iteritems():
         message = message.replace(k,v)
-        
+
     if recipients is None:
         recipients = allTelegramBots
     for recipient in recipients:
@@ -497,3 +501,6 @@ def sendNotification(header, message, url=None, recipients = None):
 
 def sendNotificationToAllAdmins(header, message, url=None):
     sendNotification(header,message,url,allTelegramAdminBots)
+
+def getLanguage():
+    return language

@@ -1,6 +1,7 @@
 #https://github.com/openhab/openhab-core/blob/master/bundles/org.openhab.core.semantics/model/SemanticTags.csv
 from shared.actions import HTTP
 from shared.services import get_service
+from shared.helper import getLanguage
 
 import json
 import re
@@ -60,7 +61,13 @@ class SemanticModel:
       
     def __init__(self,item_registry,config):
         semantic_tags = {}
-        f = io.open("/openhab/python/shared/semantic/config/tags_de.txt", "r", encoding="utf-8")
+        
+        # maybe it's possible to get the tags from bundle https://github.com/openhab/openhab-core/tree/main/bundles/org.openhab.core.semantics/src/main/resources
+        # but ignore the first (the comment) line when parse file content bellow
+        tagFile = "/openhab/python/shared/semantic/config/tags.txt"
+        if getLanguage() != "en":
+            tagFile = "/openhab/python/shared/semantic/config/tags_" + getLanguage() +".txt"
+        f = io.open(tagFile, "r", encoding="utf-8")
         lines = f.readlines()
         for line in lines:
             keys,synonyms = line.strip().split("=")
