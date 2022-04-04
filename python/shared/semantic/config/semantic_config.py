@@ -29,7 +29,7 @@ SemanticConfig = {
     },
     "main": {
         "replacements": [ [ u"ß", u"ss" ] ], # character cleanups
-        "phrase_separator": " abd ",
+        "phrase_separator": " and ",
         "phrase_part_matcher": u"(.*[^0-9a-zA-ZäÄöÖüÜ]+|^){}(.*|$)",
         "phrase_full_matcher": u"(.*[^0-9a-zA-ZäÄöÖüÜ]+|^){}([^0-9a-zA-ZäÄöÖüÜ]+.*|$)",
         "phrase_sub": ["front","back","left","right","top","bottom"],
