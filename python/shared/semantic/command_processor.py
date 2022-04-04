@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 import re
 
-from shared.helper import  sendCommandIfChanged, getItemState
+from shared.helper import  sendCommandIfChanged, getItemState, getLanguage
 
-from config.semantic_config import SemanticConfig
+import importlib
+
+moduleName = "shared.semantic.config.semantic_config"
+if getLanguage() != "en":
+    moduleName = moduleName + "_" + getLanguage()
+
+module = importlib.import_module(moduleName)
+SemanticConfig = module.SemanticConfig
 
 from model.semantic_model import SemanticModel
 
@@ -11,17 +18,17 @@ class VoiceAction:
     def __init__(self,cmd):
         self.complete_search = cmd
         self.unprocessed_search = cmd
-        
+
         self.location_matches = []
-        
+
         self.points = []
         self.point_search_terms = []
 
         self.cmd = None
         self.cmd_search_terms = []
-        
+
         self.item_actions = []
-  
+
 class ItemCommand:
     def __init__(self,cmd_config,cmd_type,cmd_value):
         self.cmd_config = cmd_config
@@ -45,22 +52,22 @@ class ItemMatcher:
         for match in part_match:
             self.part_match += match.split(" ")
         self.all_matches = set(self.full_match + self.part_match)
-    
+
     def getPriority(self):
         return len(self.full_match) * 1.2 + len(self.part_match) * 1.1
         #return len(" ".join(self.full_match)) * 1.2 + len(" ".join(self.part_match)) * 1.1
- 
+
 class CommandProcessor:
     def __init__(self,log,ir):
         self.debug = False
 
         self.log = log
-        
+
         self.semantic_model = SemanticModel(ir,SemanticConfig)
         self.semantic_model.test(self.log)
-        
+
         self.full_phrase_map, self.full_phrase_terms = self.buildSearchMap(self.semantic_model.getSemanticItem(SemanticConfig["main"]["phrase_equipment"]).getChildren())
- 
+
     def buildSearchMap(self,semantic_items):
         search_map = {}
         for semantic_item in semantic_items:
@@ -70,14 +77,14 @@ class CommandProcessor:
                 search_map[search_term].append(semantic_item)
         search_terms = sorted(search_map, key=len, reverse=True)
         return search_map, search_terms
-   
+
     def getItemsByType(self,parent,type):
         result = []
         if parent.getItem().getType() == "Group":
-            #self.log.info(u" => {} {}".format(parent.getName(),parent.getType()))
+            #self.log.info(u" => {} {}".format(parent.getItem().getName(),parent.getItem().getType()))
             semantic_items = parent.getChildren()
             for semantic_item in semantic_items:
-                #self.log.info(u" => {}".format(item.getName()))
+                #self.log.info(u" => {}".format(semantic_item))
                 if semantic_item.getSemanticType() == type:
                     result.append(semantic_item)
                 else:
@@ -96,7 +103,7 @@ class CommandProcessor:
         new_matched_terms = []
         full_matched_terms = _full_matched_terms[:]
         part_matched_terms = _part_matched_terms[:]
-  
+
         # check for matches
         is_match = False
         for search_term in semantic_item.getSearchTerms():
@@ -117,7 +124,7 @@ class CommandProcessor:
             is_match = False
 
         if location_search:
-            # clean unprocessed search terms    
+            # clean unprocessed search terms
             for search_term in new_matched_terms:
                 unprocessed_search = unprocessed_search.replace(search_term,"")
 
@@ -132,13 +139,13 @@ class CommandProcessor:
                 except KeyError:
                     #self.log.info(u"item {} not found".format(_item.getName()))
                     pass
-                
+
         # add own match only if there are no sub matches
         if is_match and len(matches) == 0:
             matches.append(ItemMatcher(semantic_item,list(set(full_matched_terms)),list(set(part_matched_terms))))
-    
+
         return matches
-         
+
     def detectLocations(self,actions):
         for action in actions:
             matches = []
@@ -155,7 +162,7 @@ class CommandProcessor:
                 action.location_matches = last_matches
             else:
                 last_matches = action.location_matches
- 
+
         # Fill missing locations backward
         last_matches = []
         for action in reversed(actions):
@@ -170,19 +177,19 @@ class CommandProcessor:
                 if len(action.location_matches) != 0:
                     continue
                 action.location_matches = [ ItemMatcher(self.semantic_model.getSemanticItem(fallback_location_name),[],[]) ]
-    
+
     def checkPoints(self,action,unprocessed_search,items_to_skip):
         results = {}
-        
+
         for location_match in action.location_matches:
-          
+
             _unprocessed_search = unprocessed_search
             for matched_search in location_match.all_matches:
                 _unprocessed_search = _unprocessed_search.replace(matched_search,"")
-                
+
             if self.debug:
                 self.log.info(u"  location: '{}' => '{}'".format(location_match.semantic_item.getItem().getName(),location_match.all_matches))
-            
+
             equipments = self.getItemsByType(location_match.semantic_item,"Equipment")
             for equipment in equipments:
 
@@ -199,7 +206,7 @@ class CommandProcessor:
                         results[key][2] += self.getItemsByType(match.semantic_item,"Point")
                     else:
                         results[key][2].append(match.semantic_item)
-                    
+
         # check which result combination (location/equipment/property) has the highest priority
         final_priority = 0
         final_key = None
@@ -208,10 +215,10 @@ class CommandProcessor:
         for key in results:
             match = results[key]
             #self.log.info(u"{} {}".format(key,match))
-            
+
             if match[0] < final_priority:
                 continue
-            
+
             if match[0] == final_priority:
                 if key != final_key:
                     if len(key) <= len(final_key):
@@ -224,13 +231,13 @@ class CommandProcessor:
             final_priority = match[0]
             action.point_search_terms = match[1]
             action.points = match[2]
-                
+
         if final_key is not None:
             for search in final_key.split(","):
                 unprocessed_search = unprocessed_search.replace(search,"")
-        
+
         action.unprocessed_search = unprocessed_search
- 
+
     def detectPoints(self,actions):
         for action in actions:
             # search for points based on voice_cmd
@@ -242,13 +249,13 @@ class CommandProcessor:
         for action in reversed(actions):
             if action.cmd != None: # maybe not needed
                 last_action = None
- 
+
             if len(action.points) == 0:
                 if last_action != None:
                     self.checkPoints(action,u"{} {}".format(" ".join(last_action.point_search_terms),action.unprocessed_search),last_action.points)
             else:
                 last_action = action
- 
+
         # Fill missing points forwards
         last_action = None
         for action in actions:
@@ -263,11 +270,11 @@ class CommandProcessor:
         if cmd_type in SemanticConfig["mappings"]:
             if value in SemanticConfig["mappings"][cmd_type]:
                 value = SemanticConfig["mappings"][cmd_type][value]
-            if cmd_type == "PERCENT": 
+            if cmd_type == "PERCENT":
                 if not value.isnumeric():
                     value = None
         return value
-          
+
     def checkCommand(self,action):
         # check if we have a unique property like Light or ColorTemperature
         main_properties = []
@@ -299,14 +306,14 @@ class CommandProcessor:
                             action.cmd_search_terms.append(search)
                             return cmd_type, cmd_config, cmd_config["value"]
         return None, None, None
-                                
+
     def detectCommand(self,actions):
         for action in actions:
             # search for cmd based on voice_cmd
             cmd_type, cmd_config, cmd_value = self.checkCommand(action)
             if cmd_type is not None:
                 action.cmd = ItemCommand(cmd_config,cmd_type,cmd_value)
- 
+
     def fillCommandFallbacks(self,actions):
         # Fill missing commands backward
         last_action = None
@@ -343,7 +350,7 @@ class CommandProcessor:
                 processed_items[item_name] = True
                 action.item_actions.append(ItemAction(point.item,action.cmd.cmd_type,action.cmd.cmd_value))
         #self.log.info(u"{}".format(processed_items.keys()))
-              
+
     def process(self,voice_command, fallback_location_name):
         actions = []
         voice_command = voice_command.lower()
@@ -355,9 +362,9 @@ class CommandProcessor:
                 for semantic_item in self.full_phrase_map[search]:
                     action.item_actions.append(ItemAction(semantic_item.getItem(),"SWITCH","ON"))
                 actions.append(action)
-                #self.log.info(u"{}".format(search))
+                #self.log.info(u"process - search: {}".format(search))
                 break
-     
+
         # check for item commands
         if len(actions)==0:
             for read_phrase in SemanticConfig["commands"]["READ"][0]["synonyms"]:
@@ -380,9 +387,9 @@ class CommandProcessor:
             self.fillCommandFallbacks(actions)
 
             self.validateActions(actions)
- 
+
         return actions
- 
+
     def getFormattedValue(self,item):
         value = getItemState(item).toString()
         if item.getType() == "Dimmer":
@@ -415,9 +422,9 @@ class CommandProcessor:
         semantic_equipment = self.getParentByType(semantic_item,"Equipment")
         semantic_location = self.getParentByType(semantic_equipment,"Location")
         #semantic_location = self.getParentByType(semantic_item,"Location")
- 
+
         value = self.getFormattedValue(semantic_item.getItem())
-        
+
         for tag in semantic_item.getItem().getTags():
             if tag not in SemanticConfig["answers"]:
                 continue
@@ -474,15 +481,15 @@ class CommandProcessor:
                             sendCommandIfChanged(item_action.item,item_action.cmd_value)
 
                         if semantic_item.getAnswer() is not None:
-                            msg_r.append(semantic_item.getAnswer()) 
+                            msg_r.append(semantic_item.getAnswer())
             if len(msg_r) > 0:
                 if len(msg_r) > 2:
                     msg_r = [ msg_r[0], SemanticConfig["i18n"]["more_results"].format(count=len(msg_r)-1) ]
 
                 msg = SemanticConfig["i18n"]["message_join_separator"].join(msg_r)
- 
+
         return msg, is_valid
-      
+
     def parseData(self,input):
         data = input.split("|")
         for replace in SemanticConfig["main"]["replacements"]:
