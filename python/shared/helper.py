@@ -320,6 +320,15 @@ def getItemState(itemOrName):
         raise NotInitialisedException(u"Item state for {} not found".format(name))
     return state
 
+def getPreviousItemState(itemOrName):
+    item = getItem(itemOrName)
+    entry = getHistoricItemEntry(item, ZonedDateTime.now())
+    entryTime = entry.getTimestamp()
+
+    previousEntry = getHistoricItemEntry(item, entryTime.minusNanos(1))
+
+    return previousEntry.getState()
+
 def getHistoricItemEntry(itemOrName, refDate):
     item = _getItem(itemOrName)
     historicEntry = PersistenceExtensions.historicState(item, refDate, "jdbc")
