@@ -484,53 +484,78 @@ def getStableItemState( now, itemName, checkTimeRange ):
 
     return value
 
-# *** Notifications ***
-def sendNotification(header, message, url=None, recipients = None):
-    chars = {
-        u"_": u"\\_"
-    }
-    for k,v in chars.iteritems():
-        message = message.replace(k,v)
+class NotificationHelper:
+    PRIORITY_INFO = 1
+    PRIORITY_NOTICE = 2
+    PRIORITY_WARN = 3
+    PRIORITY_ERROR = 4
+    PRIORITY_ALERT = 5
 
-    if recipients is None:
+    # *** Notifications ***
+    @staticmethod
+    def sendNotification(priority, header, message, url=None, recipients = None):
+        chars = {
+            u"_": u"\\_"
+        }
+        for k,v in chars.iteritems():
+            message = message.replace(k,v)
+
+        if recipients is None:
+            recipients = []
+            for userName in userConfigs:
+                if not userConfigs[userName]["notification_config"]:
+                    continue
+                recipients.append(userName)
+
+        for recipient in recipients:
+            notification_config = userConfigs[recipient]["notification_config"]
+            notification_type = notification_config[0]
+            notification_thing = notification_config[1]
+
+            action = actions.get(notification_type, notification_thing)
+
+            if notification_type == "pushover":
+                # mapping to pushover priorities
+                if priority == NotificationHelper.PRIORITY_INFO:
+                    mapped_priority = -1
+                elif priority == NotificationHelper.PRIORITY_NOTICE:
+                    mapped_priority = 0
+                elif priority == NotificationHelper.PRIORITY_WARN or priority == NotificationHelper.PRIORITY_ERROR:
+                    mapped_priority = 1
+                else:
+                    mapped_priority = 2
+            else:
+                mapped_priority = 0
+
+            log.info(notification_config[2])
+
+            if url == None:
+                if notification_type == "telegram":
+                    success = action.sendTelegram("*" + header + "*: " + message)
+                elif notification_type == "pushover":
+                    success = action.sendMessage(message, header, None, None, None, None, None, mapped_priority, notification_config[2] )
+                else:
+                    success = False
+            else:
+                if notification_type == "telegram":
+                    success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
+                elif notification_type == "pushover":
+                    success = action.sendMessage(message, header, None, None, None, url, None, mapped_priority, notification_config[2] )
+                else:
+                    success = False
+
+            if not success:
+                caller = getframeinfo(stack()[1][0])
+                log.error(u"Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
+
+    @staticmethod
+    def sendNotificationToAllAdmins(priority, header, message, url=None):
         recipients = []
         for userName in userConfigs:
-            if not userConfigs[userName]["notification_config"]:
+            if not userConfigs[userName]["notification_config"] or not userConfigs[userName]["is_admin"]:
                 continue
             recipients.append(userName)
-    for recipient in recipients:
-        notification_config = userConfigs[recipient]["notification_config"]
-        notification_type = notification_config[0]
-        notification_thing = notification_config[1]
-
-        action = actions.get(notification_type, notification_thing)
-
-        if url == None:
-            if notification_type == "telegram":
-                success = action.sendTelegram("*" + header + "*: " + message)
-            elif notification_type == "pushover":
-                success = action.sendMessage(message, header, None, None, None, None, None, 0, notification_thing[2] )
-            else:
-                success = False
-        else:
-            if notification_type == "telegram":
-                success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
-            elif notification_type == "pushover":
-                success = action.sendURLMessage(message, header, None, url, None, None, None, 0, notification_thing[2] )
-            else:
-                success = False
-
-        if not success:
-            caller = getframeinfo(stack()[1][0])
-            log.error(u"Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
-
-def sendNotificationToAllAdmins(header, message, url=None):
-    recipients = []
-    for userName in userConfigs:
-        if not userConfigs[userName]["notification_config"] or not userConfigs[userName]["is_admin"]:
-            continue
-        recipients.append(userName)
-    sendNotification(header,message,url,recipients)
+        NotificationHelper.sendNotification(priority, header, message, url, recipients)
 
 def getLanguage():
     return language
