@@ -527,8 +527,6 @@ class NotificationHelper:
             else:
                 mapped_priority = 0
 
-            log.info(notification_config[2])
-
             if url == None:
                 if notification_type == "telegram":
                     success = action.sendTelegram("*" + header + "*: " + message)
