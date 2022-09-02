@@ -25,7 +25,7 @@ from shared.jsr223 import scope
 from shared.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 from shared.services import get_service
 
-from configuration import LOG_PREFIX, allTelegramBots, allTelegramAdminBots
+from configuration import LOG_PREFIX, userConfigs
 
 log = LoggerFactory.getLogger(LOG_PREFIX)
 
@@ -493,23 +493,44 @@ def sendNotification(header, message, url=None, recipients = None):
         message = message.replace(k,v)
 
     if recipients is None:
-        recipients = allTelegramBots
+        recipients = []
+        for userName in userConfigs:
+            if not userConfigs[userName]["notification_config"]:
+                continue
+            recipients.append(userName)
     for recipient in recipients:
+        notification_config = userConfigs[recipient]["notification_config"]
+        notification_type = notification_config[0]
+        notification_thing = notification_config[1]
+
+        action = actions.get(notification_type, notification_thing)
+
         if url == None:
-            bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-            result = bot.sendTelegram("*" + header + "*: " + message)
-            if result == 0:
-                caller = getframeinfo(stack()[1][0])
-                log.error(u"Failed to send telegram message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
+            if notification_type == "telegram":
+                success = action.sendTelegram("*" + header + "*: " + message)
+            elif notification_type == "pushover":
+                success = action.sendMessage(message, header, None, None, None, None, None, 0, notification_thing[2] )
+            else:
+                success = False
         else:
-            bot = actions.get("telegram", "telegram:telegramBot:{}".format(recipient))
-            result = bot.sendTelegramPhoto(url,"*" + header + "*: " + message)
-            if result == 0:
-                caller = getframeinfo(stack()[1][0])
-                log.error(u"Failed to send telegram message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
+            if notification_type == "telegram":
+                success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
+            elif notification_type == "pushover":
+                success = action.sendURLMessage(message, header, None, url, None, None, None, 0, notification_thing[2] )
+            else:
+                success = False
+
+        if not success:
+            caller = getframeinfo(stack()[1][0])
+            log.error(u"Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
 
 def sendNotificationToAllAdmins(header, message, url=None):
-    sendNotification(header,message,url,allTelegramAdminBots)
+    recipients = []
+    for userName in userConfigs:
+        if not userConfigs[userName]["notification_config"] or not userConfigs[userName]["is_admin"]:
+            continue
+        recipients.append(userName)
+    sendNotification(header,message,url,recipients)
 
 def getLanguage():
     return language
