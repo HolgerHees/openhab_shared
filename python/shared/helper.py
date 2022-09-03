@@ -517,28 +517,33 @@ class NotificationHelper:
             if notification_type == "pushover":
                 # mapping to pushover priorities
                 if priority == NotificationHelper.PRIORITY_INFO:
-                    mapped_priority = -1
+                    mapped_priority = 0
+                    mapped_sound = "magic"
                 elif priority == NotificationHelper.PRIORITY_NOTICE:
                     mapped_priority = 0
+                    mapped_sound = "gamelan"
                 elif priority == NotificationHelper.PRIORITY_WARN or priority == NotificationHelper.PRIORITY_ERROR:
                     mapped_priority = 1
+                    mapped_sound = "intermission"
                 else:
                     mapped_priority = 2
+                    mapped_sound = "echo"
             else:
                 mapped_priority = 0
+                mapped_sound = None
 
             if url == None:
                 if notification_type == "telegram":
                     success = action.sendTelegram("*" + header + "*: " + message)
                 elif notification_type == "pushover":
-                    success = action.sendMessage(message, header, None, None, None, None, None, mapped_priority, notification_config[2] )
+                    success = action.sendMessage(message, header, mapped_sound, None, None, None, None, mapped_priority, notification_config[2] )
                 else:
                     success = False
             else:
                 if notification_type == "telegram":
                     success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
                 elif notification_type == "pushover":
-                    success = action.sendMessage(message, header, None, None, None, url, None, mapped_priority, notification_config[2] )
+                    success = action.sendMessage(message, header, mapped_sound, None, None, url, None, mapped_priority, notification_config[2] )
                 else:
                     success = False
 
