@@ -484,6 +484,31 @@ def getStableItemState( now, itemName, checkTimeRange ):
 
     return value
 
+class UserHelper:
+    @staticmethod
+    def getUserByStateItem(stateItem):
+        for userName in userConfigs:
+            if userConfigs[userName]["state_item"] != stateItem:
+                continue
+            return userName
+
+    @staticmethod
+    def getPresentUser():
+        usernames = []
+        for userName in userConfigs:
+            if not userConfigs[userName]["state_item"] or getItemState(userConfigs[userName]["state_item"]) != OnOffType.ON:
+                continue
+            usernames.append(userName)
+        return usernames
+
+    @staticmethod
+    def getName(userName):
+        return userConfigs[userName].name
+
+    @staticmethod
+    def getEMail(userName):
+        return userConfigs[userName].email
+
 class NotificationHelper:
     PRIORITY_INFO = 1
     PRIORITY_NOTICE = 2
