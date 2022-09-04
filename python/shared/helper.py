@@ -21,6 +21,8 @@ from org.openhab.core.types import UnDefType
 from org.openhab.core.persistence.extensions import PersistenceExtensions
 from org.openhab.core.thing import ChannelUID, ThingUID
 
+from org.openhab.core.library.types import OnOffType
+
 from shared.jsr223 import scope
 from shared.triggers import ItemStateUpdateTrigger, ItemStateChangeTrigger
 from shared.services import get_service
