@@ -507,10 +507,6 @@ class UserHelper:
     def getName(userName):
         return userConfigs[userName]["name"]
 
-    @staticmethod
-    def getEMail(userName):
-        return userConfigs[userName]["email"]
-
 class NotificationHelper:
     PRIORITY_INFO = 1
     PRIORITY_NOTICE = 2
