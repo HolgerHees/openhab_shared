@@ -539,6 +539,7 @@ class NotificationHelper:
 
             if action is None:
                 log.warn(u"No Action found, Type: '{}', Thing: '{}'".format(notification_type, notification_thing))
+                continue
 
             if notification_type == "pushover":
                 # mapping to pushover priorities
