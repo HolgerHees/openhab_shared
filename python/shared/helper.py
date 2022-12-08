@@ -516,6 +516,34 @@ class NotificationHelper:
 
     # *** Notifications ***
     @staticmethod
+    def _sendNotification(notification_config, notification_type, mapped_sound, mapped_priority, action, header, message, url=None, retry = 1 ):
+        success = False
+        if url == None:
+            if notification_type == "telegram":
+                success = action.sendTelegram("*" + header + "*: " + message)
+            elif notification_type == "pushover":
+                success = action.sendMessage(message, header, mapped_sound, None, None, None, None, mapped_priority, notification_config[2] )
+            else:
+                log.error(u"Unknown notification type {}".format(notification_type))
+                success = None
+        else:
+            if notification_type == "telegram":
+                success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
+            elif notification_type == "pushover":
+                success = action.sendMessage(message, header, mapped_sound, None, None, url, None, mapped_priority, notification_config[2] )
+            else:
+                log.error(u"Unknown notification type {}".format(notification_type))
+                success = None
+
+        if not success and success is not None and retry < 5:
+            waiting_time = retry * 5
+            log.info(u"Failed to send message '{}: {}'. Retry in {} seconds.".format(header, message, waiting_time))
+            time.sleep(waiting_time)
+            success = NotificationHelper._sendNotification(notification_config, notification_type, mapped_sound, mapped_priority, action, header, message, url, retry + 1)
+
+        return bool(success)
+
+    @staticmethod
     def sendNotification(priority, header, message, url=None, recipients = None):
         chars = {
             u"_": u"\\_"
@@ -559,21 +587,7 @@ class NotificationHelper:
                 mapped_priority = 0
                 mapped_sound = None
 
-            if url == None:
-                if notification_type == "telegram":
-                    success = action.sendTelegram("*" + header + "*: " + message)
-                elif notification_type == "pushover":
-                    success = action.sendMessage(message, header, mapped_sound, None, None, None, None, mapped_priority, notification_config[2] )
-                else:
-                    success = False
-            else:
-                if notification_type == "telegram":
-                    success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
-                elif notification_type == "pushover":
-                    success = action.sendMessage(message, header, mapped_sound, None, None, url, None, mapped_priority, notification_config[2] )
-                else:
-                    success = False
-
+            success = NotificationHelper._sendNotification(notification_config, notification_type, mapped_sound, mapped_priority, action, header, message, url)
             if not success:
                 caller = getframeinfo(stack()[1][0])
                 log.error(u"Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
