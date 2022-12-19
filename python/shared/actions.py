@@ -3,7 +3,6 @@
 import sys
 from shared.services import find_service
 
-
 actions = find_service("org.openhab.core.model.script.engine.action.ActionService", None)
 
 _MODULE = sys.modules[__name__]
@@ -18,8 +17,9 @@ from org.openhab.core.model.script.actions import HTTP
 from org.openhab.core.model.script.actions import Ping
 from org.openhab.core.model.script.actions import ScriptExecution
 from org.openhab.core.model.script.actions import Log
+from org.openhab.core.model.script.actions import Transformation
 
-STATIC_IMPORTS = [Exec, HTTP, Log, Ping, ScriptExecution]
+STATIC_IMPORTS = [Exec, HTTP, Log, Ping, ScriptExecution, Transformation]
 
 for action in STATIC_IMPORTS:
     name = str(action.simpleName)
