@@ -251,20 +251,25 @@ def _getItem(item):
         return item
 
 
-# *** Group trigger ***
-def _walkRecursive(parent):
+# *** Group trigger **
+def isMember(itemOrName, groupName):
+    item = getItem(itemOrName)
+    group_names = getItem(itemOrName).getGroupNames()
+    return groupName in group_names
+
+def _walkGroupMemberRecursive(parent):
     result = []
     items = parent.getAllMembers()
     for item in items:
         if item.getType() == "Group":
-            result = result + _walkRecursive(item)
+            result = result + _walkGroupMemberRecursive(item)
         else:
             result.append(item)
     return result
 
 
 def getGroupMember(itemOrName):
-    return _walkRecursive(_getItem(itemOrName))
+    return _walkGroupMemberRecursive(_getItem(itemOrName))
 
 
 def getGroupMemberUpdateTrigger(itemOrName, state=None, triggerName=None):
