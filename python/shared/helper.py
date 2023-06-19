@@ -500,13 +500,28 @@ class UserHelper:
             return userName
 
     @staticmethod
-    def getPresentUser():
+    def getPresentUser(timeout = None):
+        ref = ZonedDateTime.now().minusSeconds(timeout) if timeout is not None else None
         usernames = []
         for userName in userConfigs:
-            if not userConfigs[userName]["state_item"] or getItemState(userConfigs[userName]["state_item"]) != OnOffType.ON:
+            if not userConfigs[userName]["state_item"]:
                 continue
+
+            stateItem = getItem(userConfigs[userName]["state_item"])
+            if getItemState(stateItem) != OnOffType.ON:
+                continue
+
+            if ref is not None:
+                _update = getItemLastUpdate(stateItem)
+                if _update.isBefore(ref):
+                    continue
+
             usernames.append(userName)
         return usernames
+
+    @staticmethod
+    def getStateItem(userName):
+        return getItem(userConfigs[userName]["state_item"])
 
     @staticmethod
     def getName(userName):
