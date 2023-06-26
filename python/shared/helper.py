@@ -501,8 +501,12 @@ class UserHelper:
 
     @staticmethod
     def getPresentUser(timeout = None):
+        return list(UserHelper.getPresentUserData(timeout).keys())
+
+    @staticmethod
+    def getPresentUserData(timeout = None):
         ref = ZonedDateTime.now().minusSeconds(timeout) if timeout is not None else None
-        usernames = []
+        usernames = {}
         for userName in userConfigs:
             if not userConfigs[userName]["state_item"]:
                 continue
@@ -515,8 +519,10 @@ class UserHelper:
                 _update = getItemLastUpdate(stateItem)
                 if _update.isBefore(ref):
                     continue
+            else:
+                _update = None
 
-            usernames.append(userName)
+            usernames[userName] = {"stateItem": stateItem, "lastUpdate": _update}
         return usernames
 
     @staticmethod
