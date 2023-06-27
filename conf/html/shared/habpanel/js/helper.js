@@ -427,7 +427,7 @@ var mvInitializer = function(){
                             if( item == null ) 
                             {
                                 // Should never happen
-                                console.error("Item state requested before items initialized");
+                                console.error("Item state of '" + name + "' requested, but does not exists or is not initialized");
                                 return null;
                             }
 

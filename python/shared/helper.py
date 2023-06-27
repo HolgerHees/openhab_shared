@@ -306,7 +306,6 @@ def getItem(name):
         raise NotInitialisedException(u"Item {} not found".format(name))
     return item
 
-
 def getFilteredChildItems(itemOrName, state):
     items = getGroupMember(itemOrName)
     if isinstance(state, list):
@@ -500,29 +499,19 @@ class UserHelper:
             return userName
 
     @staticmethod
-    def getPresentUser(timeout = None):
-        return list(UserHelper.getPresentUserData(timeout).keys())
+    def getPresentUser():
+        return list(UserHelper.getPresentUserData().keys())
 
     @staticmethod
-    def getPresentUserData(timeout = None):
-        ref = ZonedDateTime.now().minusSeconds(timeout) if timeout is not None else None
+    def getPresentUserData():
         usernames = {}
         for userName in userConfigs:
             if not userConfigs[userName]["state_item"]:
                 continue
-
             stateItem = getItem(userConfigs[userName]["state_item"])
             if getItemState(stateItem) != OnOffType.ON:
                 continue
-
-            if ref is not None:
-                _update = getItemLastUpdate(stateItem)
-                if _update.isBefore(ref):
-                    continue
-            else:
-                _update = None
-
-            usernames[userName] = {"stateItem": stateItem, "lastUpdate": _update}
+            usernames[userName] = stateItem
         return usernames
 
     @staticmethod
