@@ -492,6 +492,10 @@ def getStableItemState( now, itemName, checkTimeRange ):
 
 class UserHelper:
     @staticmethod
+    def getUserNames():
+        return userConfigs.keys()
+
+    @staticmethod
     def getUserByStateItem(stateItem):
         for userName in userConfigs:
             if userConfigs[userName]["state_item"] != stateItem:
