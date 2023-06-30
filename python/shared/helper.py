@@ -50,14 +50,14 @@ scriptExtension.importPreset("RuleSimple")
 SimpleRule = scope.get("SimpleRule")
 
 class rule(object):
-    def __init__(self, name,profile=None):
+    def __init__(self, name = None,profile=None):
         self.name = name
         self.profile = profile
 
     def __call__(self, clazz):
         proxy = self
 
-        filePackage = proxy.getFilePackage(proxy.name)
+        filePackage = proxy.getFilePackage(proxy.name) if proxy.name is not None else None
         classPackage = proxy.getClassPackage(clazz.__name__)
 
         def init(self, *args, **kwargs):
@@ -81,7 +81,10 @@ class rule(object):
         subclass.execute = proxy.executeWrapper(clazz.execute)
 
         #subclass.log = logging.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
-        subclass.log = LoggerFactory.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
+        if filePackage is not None:
+            subclass.log = LoggerFactory.getLogger( LOG_PREFIX + "." + filePackage + "." + classPackage )
+        else:
+            subclass.log = LoggerFactory.getLogger( LOG_PREFIX + "." + classPackage )
 
         automationManager.addRule(subclass())
 
