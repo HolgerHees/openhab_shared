@@ -331,10 +331,13 @@ def getItemState(itemOrName):
 
 def getPreviousItemState(itemOrName):
     item = getItem(itemOrName)
+
     entry = getHistoricItemEntry(item, ZonedDateTime.now())
     entryTime = entry.getTimestamp()
 
     previousEntry = getHistoricItemEntry(item, entryTime.minusNanos(1))
+
+    #previousEntry = PersistenceExtensions.previousState(item, True, "jdbc")
 
     return previousEntry.getState()
 
