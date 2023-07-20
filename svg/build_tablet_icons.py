@@ -1,3 +1,4 @@
+#!/usr/bin/python
 
 import json
 import time
@@ -7,44 +8,12 @@ from os import listdir
 from os.path import isfile, join, basename, normpath
 import xml.etree.ElementTree as ET
 
-def isForbiddenTag(node):
-	return node.tag == '{http://www.w3.org/2000/svg}defs' or node.tag == '{http://www.w3.org/2000/svg}metadata' or node.tag == '{http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd}namedview'
 
-def file_get_contents(filename):
-	return open(filename).read()
+from smartserver.svg import fileGetContents, isForbiddenTag, cleanStyles, cleanGrayscaled
 
-def clean_styles( child ):
-	_styles = []
-	_classes = []
-	styles = child.attrib['style'].split(";")
-	
-	for style in styles:
-		data = style.split(":")
-		if data[0] == 'fill':
-			#child.attrib['fill'] = data[1]
-			pass
-		
-		elif data[0] == 'stroke':
-			#child.attrib['stroke'] = data[1]
-			pass
-		
-        # Keep opacity. Used for info svg icon.
-		elif ( data[0] == 'stroke-opacity' or data[0] == 'fill-opacity' ) and ( data[1] == '1' or data[1] == '0' ) :
-			_styles.append(data[0]+":"+data[1])
-			pass
-		
-		else:
-			#_styles.append(style)
-			pass
-		
-	if len(_styles) > 0:
-		child.attrib['style'] = ";".join(_styles)
-	else:
-		del child.attrib['style']
-		#pass
 		
 def process_files( sourcePath, file, prefix, createGrayscaled, createCleanGrayscaled, createColored, top ):
-	content = file_get_contents( sourcePath + file )
+	content = fileGetContents( sourcePath + file )
 	
 	name = file[0:-4]
 	
@@ -57,22 +26,8 @@ def process_files( sourcePath, file, prefix, createGrayscaled, createCleanGraysc
 		xml = ET.fromstring(content)
 		group = ET.Element('g', attrib = { 'id': prefix + "_" + name + "_grayscaled"})
 		
-		for node in xml.findall('.//*[@style]'):
-			if createCleanGrayscaled:    
-				del node.attrib['style']
-			else:
-				clean_styles(node)
-			
-		for node in xml.findall('.//*[@fill]'):
-			del node.attrib['fill']
-			
-		for node in xml.findall('.//*[@stroke]'):
-			del node.attrib['stroke']
-			
-		if createCleanGrayscaled:    
-			for node in xml.findall('.//*[@stroke-width]'):
-				del node.attrib['stroke-width']
-			
+		cleanGrayscaled(xml, createCleanGrayscaled)
+
 		for child in xml:
 			if isForbiddenTag(child):
 				continue
@@ -104,27 +59,23 @@ symbol_count = 0
 configs = [
 	{
         'name': 'openhab',
-		'source': '/dataRaid/shared/openhab2/svg/openhab/',
+		'source': '/dataRaid/projects/openhab_shared/svg/habpanel/openhab/',
 		'grayscaled': [
 			'light','settings','man_2'
 		]
 	},
 	{
         'name': 'haus',
-		'source': '/dataRaid/shared/openhab2/svg/haus/',
+		'source': '/dataRaid/projects/openhab_shared/svg/habpanel/haus/',
 		'grayscaled': [
 			'floor_attic','floor_first','floor_second','outside'
 		]
 	},
 	{
         'name': 'self',
-		'source': '/dataRaid/shared/openhab2/svg/self/',
+		'source': '/dataRaid/projects/openhab_shared/svg/habpanel/self/',
 		'grayscaled': [
-            'window','sensor2','info','roomba','garden','loudspeaker','energy','wind','temperature','rain','radiatore','snowflake1','snowflake2','snowflake3','snowflake4','compass_circle','compass_needle','sun'
-		],
-		'clean_grayscaled': [
-            'raindrop1','raindrop2','raindrop3','raindrop4','thunder',
-			'day','cloudy-day-0','cloudy-day-1','cloudy-day-2','night','cloudy-night-0','cloudy-night-1','cloudy-night-2','cloudy'
+            'window','sensor2','info','roomba','garden','loudspeaker','energy','wind','temperature','rain','radiatore','compass_circle','compass_needle','sun'
 		],
 		'colored': []
 	}
@@ -145,14 +96,14 @@ for config in configs:
 			
 			prefix = config['name']#basename(normpath(sourcePath))
 				
-			createCleanGrayscaled = 'clean_grayscaled' in config and file[0:-4] in config['clean_grayscaled']
+			createCleanGrayscaled = False #'clean_grayscaled' in config and file[0:-4] in config['clean_grayscaled']
 			createGrayscaled = 'grayscaled' in config and file[0:-4] in config['grayscaled']
 			createColored = 'colored' in config and file[0:-4] in config['colored']
 			symbol_count += process_files( sourcePath, file, prefix, createGrayscaled, createCleanGrayscaled, createColored, top )
 			
 			process_count += 1
 
-f = open("build/icons.svg", 'w')
+f = open("../conf/html/shared/habpanel/svg/icons.svg", 'w')
 f.write(ET.tostring(top,encoding='utf8', method='xml'))
 f.close()
 
