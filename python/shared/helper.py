@@ -16,6 +16,7 @@ from inspect import getframeinfo, stack
 from org.slf4j import LoggerFactory
 
 from org.openhab.core.automation import Rule as SmarthomeRule
+#from org.openhab.core.automation.module.script.LifecycleScriptExtensionProvider import LifecycleTracker
 
 from org.openhab.core.types import UnDefType
 from org.openhab.core.persistence.extensions import PersistenceExtensions
@@ -45,9 +46,13 @@ scriptExtension   = scope.get("scriptExtension")
 
 scriptExtension.importPreset("RuleSupport")
 automationManager = scope.get("automationManager")
+lifecycleTracker = scope.get("lifecycleTracker")
 
 scriptExtension.importPreset("RuleSimple")
 SimpleRule = scope.get("SimpleRule")
+
+def scriptUnloaded():
+    log.info("unload")
 
 class rule(object):
     def __init__(self, name = None,profile=None):
@@ -68,14 +73,9 @@ class rule(object):
             self.triggerItems = {}
             _triggers = []
             for trigger in self.triggers:
-                try:
-                    self.triggerItems[ trigger.getConfiguration().get("itemName") ] = True
-                except NotImplementedError:
-                    # openhab 2.4
-                    self.triggerItems[ trigger.trigger.getConfiguration().get("itemName") ] = True
-                    _triggers.append(trigger.trigger)
-            if len(_triggers) > 0:
-                self.triggers = _triggers
+                self.triggerItems[ trigger.trigger.getConfiguration().get("itemName") ] = True
+                _triggers.append(trigger.trigger)
+            self.triggers = _triggers
 
         subclass = type(clazz.__name__, (clazz, SimpleRule), dict(__init__=init))
         subclass.execute = proxy.executeWrapper(clazz.execute)
@@ -187,6 +187,15 @@ class rule(object):
 class NotInitialisedException(Exception):
     pass
 
+# could also be solved by storing it in a private cache => https://next.openhab.org/docs/configuration/jsr223.html
+# because Timer & ScheduledFuture are canceled when a private cache is cleaned on unload or refresh
+activeTimer = []
+def cleanTimer():
+    for timer in list(activeTimer):
+        #log.info("cleanup")
+        timer.cancel()
+lifecycleTracker.addDisposeHook(cleanTimer)
+
 def startTimer(log, duration, callback, args=[], kwargs={}, oldTimer = None, groupCount = 0 ):
     if oldTimer != None:
         oldTimer.cancel()
@@ -218,6 +227,7 @@ class createTimer:
     def handler(self):
         try:
             self.callback(*self.args, **self.kwargs)
+            activeTimer.remove(self)
         except:
             self.log.error(u"{}".format(traceback.format_exc()))
             raise
@@ -226,6 +236,7 @@ class createTimer:
         if not self.timer.isAlive():
             #log.info("timer started")
             self.timer.start()
+            activeTimer.append(self)
         else:
             #log.info("timer already started")
             pass
@@ -234,6 +245,7 @@ class createTimer:
         if self.timer.isAlive():
             #log.info("timer stopped")
             self.timer.cancel()
+            activeTimer.remove(self)
         else:
             #log.info("timer not alive")
             pass

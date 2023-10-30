@@ -59,7 +59,9 @@ class SemanticModel:
         #log.info(u"{}".format(self.semantic_items["pOther_Scene4"].answer))
         pass
       
-    def __init__(self,item_registry,config):
+    def __init__(self,log,item_registry,config):
+        self.log = log
+
         semantic_tags = {}
         
         # maybe it's possible to get the tags from bundle https://github.com/openhab/openhab-core/tree/main/bundles/org.openhab.core.semantics/src/main/resources

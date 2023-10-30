@@ -63,7 +63,7 @@ class CommandProcessor:
 
         self.log = log
 
-        self.semantic_model = SemanticModel(ir,SemanticConfig)
+        self.semantic_model = SemanticModel(log, ir,SemanticConfig)
         self.semantic_model.test(self.log)
 
         self.full_phrase_map, self.full_phrase_terms = self.buildSearchMap(self.semantic_model.getSemanticItem(SemanticConfig["main"]["phrase_equipment"]).getChildren())
