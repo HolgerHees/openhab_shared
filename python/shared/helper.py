@@ -559,7 +559,7 @@ class NotificationHelper:
             if notification_type == "telegram":
                 success = action.sendTelegram("*" + header + "*: " + message)
             elif notification_type == "pushover":
-                success = action.sendMessage(message, header, mapped_sound, None, None, None, None, mapped_priority, notification_config[2] )
+                success = action.sendMessage(message, header, mapped_sound, None, None, None, None, mapped_priority, notification_config[2], None )
             else:
                 log.error(u"Unknown notification type {}".format(notification_type))
                 success = None
@@ -567,7 +567,8 @@ class NotificationHelper:
             if notification_type == "telegram":
                 success = action.sendTelegramPhoto(url,"*" + header + "*: " + message)
             elif notification_type == "pushover":
-                success = action.sendMessage(message, header, mapped_sound, None, None, url, None, mapped_priority, notification_config[2] )
+                #sendMessage(String message, @Nullable String title, @Nullable String sound, @Nullable String url, @Nullable String urlTitle, @Nullable String attachment, @Nullable String contentType, @Nullable Integer priority, @Nullable String device, @Nullable Duration ttl)
+                success = action.sendMessage(message, header, mapped_sound, None, None, url, None, mapped_priority, notification_config[2], None )
             else:
                 log.error(u"Unknown notification type {}".format(notification_type))
                 success = None

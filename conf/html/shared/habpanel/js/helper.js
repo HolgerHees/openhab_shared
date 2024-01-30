@@ -1236,70 +1236,114 @@ var mvInitializer = function(){
                 template: '<div><img></div>',
                 link: function(scope, element, attrs) {
                     var inlineUrl = "//" + authType + domain + "/" + scope.ngModel.config.imageUrl;
-                    var popupUrl = "//" + authType + domain + "/" + scope.ngModel.config.streamUrl;
+                    var popupUrl = scope.ngModel.config.streamUrl ? "//" + authType + domain + "/" + scope.ngModel.config.streamUrl : null;
                     var inlineRefreshInterval = scope.ngModel.config.imageRefresh;
                     var imageWidth = 0;
                     var imageHeight = 0;
                     var timeoutRef = null;
                     
-                    function setInlineUrl( element )
+                    function setUrl( element, url, interval, width, height, timeoutRef, callback )
                     {
-                        let _url = inlineUrl;
+                        let _url = url;
                         
-                        _url += ( _url.indexOf("?") == -1 ? "?" : "&" ) + 'rand=' + Math.random();
-                    
-                        _url = _url.replace("{width}",imageWidth);//element.parent()[0].clientWidth);
-                        _url = _url.replace("{height}",imageHeight);//:,element.parent()[0].clientHeight);
-                        _url = _url.replace("{age}",inlineRefreshInterval * 1000);
-                        
-                        var img = new Image();
-                        img.onload = function()
-                        {
-                            //console.log("set real");
-                            element[0].firstChild.firstChild.src = _url;
+                        _url += ( _url.indexOf("?") == -1 ? "?" : "&" ) + 'time=' + ( new Date().getTime() );
 
-                            sessionStorage.setItem('mvWidgetImagePopup.inlineUrl_'+inlineUrl, _url);
+                        //console.log(element[0].firstChild.firstChild.clientWidth);
+                    
+                        _url = _url.replace("{width}",width);//element.parent()[0].clientWidth);
+                        _url = _url.replace("{height}",height);//:,element.parent()[0].clientHeight);
+                        _url = _url.replace("{age}",interval * 1000);
+                        
+                        const startTime = performance.now();
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("GET", _url);
+                        xhr.withCredentials = true;
+                        xhr.responseType = 'blob';
+                        xhr.onreadystatechange = function() {
+                            if (this.readyState != 4) return;
+
+                            if( this.status == 200 )
+                            {
+                                var image = element[0].firstChild.firstChild;
+                                var imageURL = window.URL.createObjectURL(this.response);
+                                image.onload = function()
+                                {
+                                    sessionStorage.setItem('mvWidgetImagePopup.inlineUrl_'+inlineUrl, _url);
+
+                                    const duration = performance.now() - startTime;
+                                    callback(duration, timeoutRef);
+                                }
+                                image.onerror = function(event)
+                                {
+                                    console.error("Image loading error");
+                                    const duration = performance.now() - startTime;
+                                    callback(duration, timeoutRef);
+                                }
+                                image.src = imageURL;
+                            }
+                            else
+                            {
+                                console.error("Image response error: " + this.status);
+                                const duration = performance.now() - startTime;
+                                callback(duration, timeoutRef);
+                            }
+                        };
+                        xhr.send();
+                    }
+
+                    function handleImageRefresh(element, url, interval, width, height)
+                    {
+                        function handleTrigger()
+                        {
+                            setUrl( element, url, interval, width, height, timeoutRef, function(duration, _timeoutRef){
+                                if( timeoutRef != _timeoutRef) return;
+                                var _interval = ( interval * 1000 ) - duration;
+                                if( _interval > 0 ) timeoutRef = $timeout( handleTrigger, _interval, 0, false);
+                                else handleTrigger();
+                            });
                         }
-                        img.src = _url;
+
+                        handleTrigger();
                     }
                     
                     function togglePopup( element, forceInline )
                     {
+                        $timeout.cancel(timeoutRef);
+                        timeoutRef = null;
+
                         if( forceInline || element[0].firstChild.classList.contains("popup") )
                         {
                             //console.log("mvWidgetImagePopup: start inline refresh " + inlineRefreshInterval );
 
                             element[0].firstChild.classList.remove("popup");
-                            
-                            function handleTrigger()
-                            {
-                                //console.log("mvWidgetImagePopup: call inline refresh");
-                                setInlineUrl( element );
 
-                                timeoutRef = $timeout( handleTrigger, inlineRefreshInterval * 1000, 0, false);
-                            }
-                            
-                            handleTrigger();
-                            
-                            scope.$on('$destroy', function (event) 
-                            {
-                                //console.log("mvWidgetImagePopup: cancel inline refresh");
-                                $timeout.cancel(timeoutRef);
-                            });
+                            handleImageRefresh(element, inlineUrl, inlineRefreshInterval, imageWidth, imageHeight);
                         }
                         else
                         {
                             //console.log("mvWidgetImagePopup: stop inline refresh");
 
                             element[0].firstChild.classList.add("popup");
-                            element[0].firstChild.firstChild.src = popupUrl;
-                            
-                            $timeout.cancel(timeoutRef);
+
+                            if( popupUrl )
+                            {
+                                element[0].firstChild.firstChild.src = popupUrl;
+                            }
+                            else
+                            {
+                                handleImageRefresh(element, inlineUrl, 1, 0, 0);
+                            }
                         }
                     }
 
                     function initLoader( $timeout, scope, element )
                     {
+                        scope.$on('$destroy', function (event)
+                        {
+                            //console.log("mvWidgetImagePopup: cancel inline refresh");
+                            $timeout.cancel(timeoutRef);
+                        });
+
                         //console.log( element[0].clientWidth);
                         if( element[0].clientWidth > 0 )
                         {
@@ -1316,11 +1360,12 @@ var mvInitializer = function(){
                     }
 
                     var timeout = 0;
+                    var _url = sessionStorage.getItem( 'mvWidgetImagePopup.inlineUrl_'+inlineUrl);
                     // force last cached img
-                    if( sessionStorage.getItem( 'mvWidgetImagePopup.inlineUrl_'+inlineUrl) )
+                    if( _url )
                     {
-                        //console.log("use cache");
-                        element[0].firstChild.firstChild.src = sessionStorage.getItem( 'mvWidgetImagePopup.inlineUrl_'+inlineUrl);
+                        //console.log("use cache " + _url);
+                        element[0].firstChild.firstChild.src = _url;
                         timeout = 1000;
                     }
                     
