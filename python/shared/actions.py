@@ -12,14 +12,17 @@ for action in actions:
     name = str(action_class.simpleName)
     setattr(_MODULE, name, action_class)
 
+from org.openhab.core.model.script.actions import Audio
 from org.openhab.core.model.script.actions import Exec
 from org.openhab.core.model.script.actions import HTTP
+from org.openhab.core.model.script.actions import Log
 from org.openhab.core.model.script.actions import Ping
 from org.openhab.core.model.script.actions import ScriptExecution
-from org.openhab.core.model.script.actions import Log
+from org.openhab.core.model.script.actions import Semantics
 from org.openhab.core.model.script.actions import Transformation
+from org.openhab.core.model.script.actions import Voice
 
-STATIC_IMPORTS = [Exec, HTTP, Log, Ping, ScriptExecution, Transformation]
+STATIC_IMPORTS = [Audio, Exec, HTTP, Log, Ping, ScriptExecution, Semantics, Transformation, Voice]
 
 for action in STATIC_IMPORTS:
     name = str(action.simpleName)

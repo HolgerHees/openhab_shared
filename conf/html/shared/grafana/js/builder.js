@@ -18,21 +18,16 @@ var REST_URL = "/rest/items/";
 var SMARTHOME_GRAFANA_DEFAULTS = {
     // library
     debug: "false",
-    render: "false",
     refresh: "0",
     // ESH sitemap
     sitemap: "default",
     // Grafana URL
     urlPrefix: "//" + auth_type + "grafana." + domain,
     panelPath: "/d-solo/",
-    renderPanelPath: "/render/d-solo/",
     // Grafana panel parameters
     from: "now-1d",
     to: "now",
-    theme: "dark",
-    // Grafana render panel parameters
-    width: "auto",
-    height: "auto"
+    theme: "dark"
 };
 
 function resolveParam(params, name)
@@ -206,13 +201,9 @@ function GrafanaPanel(params)
     let frame = resolveParam(params, "frame");
     let urlPrefix = resolveParam(params, "urlPrefix");
     let panelPath = resolveParam(params, "panelPath");
-    let renderPanelPath = resolveParam(params, "renderPanelPath");
     let libVars = {
         debug: {
             value: resolveParam(params, "debug")
-        },
-        render: {
-            value: resolveParam(params, "render")
         },
         refresh: {
             value: resolveParam(params, "refresh")
@@ -237,28 +228,18 @@ function GrafanaPanel(params)
         theme: {
             key: "theme",
             value: resolveParam(params, "theme")
-        },
-        width: {
-            key: "width",
-            value: resolveParam(params, "width")
-        },
-        height: {
-            key: "height",
-            value: resolveParam(params, "height")
         }
     };
 
     function updateFrameSourceURL() 
     {
         var debug = libVars.debug.value;
-        var render = libVars.render.value;
         var refresh = libVars.refresh.value;
 
         var iframe = document.getElementById(frame);
-        var idocument = iframe.contentWindow.document;
 
         var url = urlPrefix;
-        url += render === "true" ? renderPanelPath : panelPath;
+        url += panelPath;
         url += urlVars.dashboard.value;
 
         var firstParameter = true;
@@ -267,15 +248,6 @@ function GrafanaPanel(params)
             var key = urlVars[uvKey].key;
             var value = urlVars[uvKey].value;
 
-            if( key === "width" ) 
-            {
-                value = render === "false" ? undefined : (value === "auto" ? idocument.body.clientWidth : value);
-            }
-            else if( key === "height" ) 
-            {
-                value = render === "false" ? undefined : (value === "auto" ? idocument.body.clientHeight : value);
-            }
-
             if( key !== undefined && value !== undefined ) 
             {
                 url += (firstParameter ? "?" : "&") + key + "=" + value;
@@ -283,47 +255,13 @@ function GrafanaPanel(params)
             }
         }
         
-        if( render === "true" ) 
-        {
-            // append cache busting parameter
-            url += "&cacheBuster=" + Date.now();
-        }
-        // update frame content
-        if( debug === "true" )
-        {
-            idocument.open();
-            idocument.write("<a href=\"" + url + "\">" + url + "</a>");
-            idocument.close();
-        }
-        else if( render === "true" )
-        {
-            var htmlUrl = url.replace(renderPanelPath, panelPath);
-            idocument.open();
-            idocument.write("<style>body{margin:0px}p{margin:0px}</style>");
-            idocument.write("<p style=\"text-align:center;\"><a href=\"" + htmlUrl + "\"><img src=\"" + url + "\"></a></p>");
-            idocument.close();
-        }
-        else if( document.getElementById(frame).src !== url )
+        if( document.getElementById(frame).src !== url )
         {
             // replace the URL so changes are not added to the browser history
             iframe.contentWindow.location.replace(url);
         }
-
-        if( render === "true" && refresh > 0 ) 
-        {
-            refreshTimerId = setTimeout(updateFrameSourceURL, refresh);
-        }
     }
 
-    function updateFrameOnResize() 
-    {
-        clearTimeout(resizeTimerId);
-        if( libVars.render.value === "true" && ( urlVars.width.value === "auto" || urlVars.height.value === "auto" ) ) 
-        {
-            resizeTimerId = setTimeout(updateFrameSourceURL, 500);
-        } 
-    }
-    
     function updateVars(vars)
     {
         for( let [key, value] of Object.entries(vars) )
@@ -337,11 +275,6 @@ function GrafanaPanel(params)
         {
             if( params ) updateVars(params);
             updateFrameSourceURL();
-            if( !initialized && libVars.render.value === "true" && ( urlVars.width.value === "auto" || urlVars.height.value === "auto" ) )
-            {
-                initialized = true;
-                window.addEventListener("resize", updateFrameOnResize);
-            }
         },
     }
 }
@@ -456,14 +389,10 @@ function GrafanaBuilder(panelConfigs)
         frame.id = "panel-" + uniqueId + "-frame";
         frame.className = "panel-frame";
         frame.scrolling = "no";
-        frame.onload = function() 
+        frame.addEventListener("load", function()
         {
-            var cssLink = this.contentWindow.document.createElement("link");
-            cssLink.href = "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/grafana.css"; 
-            cssLink.rel = "stylesheet"; 
-            cssLink.type = "text/css"; 
-            this.contentWindow.document.head.appendChild(cssLink);
-        };
+            this.contentWindow.postMessage({ type: "css", src: "//" + auth_type + "openhab." + domain + "/static/shared/grafana/css/grafana.css" }, "*");
+        });
         div.appendChild(frame);
 
         params["frame"] = frame.id;

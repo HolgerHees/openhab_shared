@@ -1397,31 +1397,23 @@ var mvInitializer = function(){
                     elem[0].style="visibility:hidden";
                     elem[0].addEventListener("load", function()
                     {
-                        let element = elem[0].contentWindow.document.querySelector('main');
-                        element.style="background: transparent !important;";
-
-                        element = elem[0].contentWindow.document.querySelector('body');
-                        element.style="background: transparent !important;";
-
                         elem[0].style="";
                         
                         var css = '.mdl-form {';
                         css = css + "background-color: black !important;";
                         css = css + "color: white !important;";
                         css = css + "}";
-                        css = css + "body { font-family: Roboto; }";
-                        css = css + ".mdl-form__row {border-bottom: 1px solid rgba(38,191,117,.50);}";
+                        css = css + "main { background: transparent !important; }";
+                        css = css + "body { font-family: Roboto; background: transparent !important;}";
+                        css = css + ".mdl-form__row {border-bottom: 1px solid rgba(38,191,117,.50); color: white !important; }";
                         css = css + ".mdl-form__label, .mdl-form__text, .mdl-form__value--text-link { font-size:17px; }";
                         css = css + ".mdl-layout__header { background-color: black !important; border-bottom: 1px solid rgba(38,191,117,.50);}";
                         css = css + ".mdl-slider__background-upper { background-color: white !important;}";
                         css = css + ".mdl-form input[type=range].is-lowest-value::-webkit-slider-thumb { background-color: white !important;}";
                         css = css + ".mdl-form input[type=range].is-lowest-value::-moz-range-thumb { background-color: white !important;}";
                         //css = css + ".mdl-layout__header { background-color: rgba(38,191,117,.1) !important; border-bottom: 1px solid rgba(38,191,117,.50);}";
-                        
-                        var head = elem[0].contentWindow.document.getElementsByTagName('head')[0];
-                        var style = elem[0].contentWindow.document.createElement('style');
-                        style.appendChild(document.createTextNode(css));
-                        head.appendChild(style);
+
+                        elem[0].contentWindow.postMessage({ type: "css", content: css }, "*");
                     });
                 }
             };

@@ -55,7 +55,7 @@ def scriptUnloaded():
     log.info("unload")
 
 class rule(object):
-    def __init__(self, name = None,profile=None):
+    def __init__(self, name = None, profile=None):
         self.name = name
         self.profile = profile
 
@@ -364,12 +364,18 @@ def getHistoricItemEntry(itemOrName, refDate):
 def getHistoricItemState(itemOrName, refDate):
     return getHistoricItemEntry(itemOrName, refDate).getState()
 
-
 def getMaxItemState(itemOrName, refDate):
     item = _getItem(itemOrName)
     historicState = PersistenceExtensions.maximumSince(item, refDate, "jdbc")
     if historicState is None:
         raise NotInitialisedException(u"Item max state for {} before {} not found".format(item.getName(),refDate))
+    return historicState.getState()
+
+def getMinItemState(itemOrName, refDate):
+    item = _getItem(itemOrName)
+    historicState = PersistenceExtensions.minimumSince(item, refDate, "jdbc")
+    if historicState is None:
+        raise NotInitialisedException(u"Item min state for {} before {} not found".format(item.getName(),refDate))
     return historicState.getState()
 
 
