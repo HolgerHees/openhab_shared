@@ -1313,17 +1313,27 @@ var mvInitializer = function(){
 
                         if( forceInline || element[0].firstChild.classList.contains("popup") )
                         {
-                            //console.log("mvWidgetImagePopup: start inline refresh " + inlineRefreshInterval );
-
-                            element[0].firstChild.classList.remove("popup");
+                            if( element[0].firstChild.classList.contains("popup") )
+                            {
+                                element[0].firstChild.style.inset = element[0].firstChild.dataset.inset;
+                                element[0].firstChild.style.backgroundColor = "";
+                                window.setTimeout(function(){
+                                    element[0].firstChild.style.inset = "";
+                                    element[0].firstChild.classList.remove("popup");
+                                },500);
+                            }
 
                             handleImageRefresh(element, inlineUrl, inlineRefreshInterval, imageWidth, imageHeight);
                         }
                         else
                         {
-                            //console.log("mvWidgetImagePopup: stop inline refresh");
-
                             element[0].firstChild.classList.add("popup");
+                            element[0].firstChild.style.inset = element[0].firstChild.dataset.inset;
+
+                            window.setTimeout(function(){
+                                element[0].firstChild.style.inset = "0 0 0 0";
+                                element[0].firstChild.style.backgroundColor = "rgba(0,0,0,0.9)";
+                            },50);
 
                             if( popupUrl )
                             {
@@ -1349,6 +1359,14 @@ var mvInitializer = function(){
                         {
                             imageWidth = element[0].clientWidth;
                             imageHeight = element[0].clientHeight;
+
+                            var rect = element[0].firstChild.getBoundingClientRect()
+                            var right = window.innerWidth - rect["left"] - rect["width"];
+                            var right = window.innerWidth - rect["left"] - rect["width"];
+                            var bottom = window.innerHeight - rect["top"] - rect["height"];
+
+                            element[0].firstChild.dataset.inset = rect["top"] + "px " + right + "px " + bottom + "px " + rect["left"] + "px";
+
                             togglePopup( element, true );
                             
                             element[0].addEventListener("click",function(){ togglePopup(element,false);});

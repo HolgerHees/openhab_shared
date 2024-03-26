@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import json
 import time
-import urlparse
 import sys
 from os import listdir
 from os.path import isfile, join, basename, normpath
@@ -35,7 +34,7 @@ def process_files( sourcePath, file, prefix, createGrayscaled, createCleanGraysc
 			group.append(child)
 			
 		top.append(group)
-		print " --> added default icon '" + sourcePath + group.attrib['id'] + "'"
+		print(" --> added default icon '" + sourcePath + group.attrib['id'] + "'")
 		symbol_count = symbol_count + 1
 		
 	if createColored:
@@ -46,7 +45,7 @@ def process_files( sourcePath, file, prefix, createGrayscaled, createCleanGraysc
 				continue
 			group.append(child)
 		top.append(group)
-		print " --> added colored icon '" + sourcePath + group.attrib['id'] + "'"
+		print(" --> added colored icon '" + sourcePath + group.attrib['id'] + "'")
 		symbol_count = symbol_count + 1
 
 	return symbol_count
@@ -59,21 +58,21 @@ symbol_count = 0
 configs = [
 	{
         'name': 'openhab',
-		'source': '/dataRaid/projects/openhab_shared/svg/habpanel/openhab/',
+		'source': '/smartserver/data/projects/openhab_shared/svg/habpanel/openhab/',
 		'grayscaled': [
 			'light','settings','man_2'
 		]
 	},
 	{
         'name': 'haus',
-		'source': '/dataRaid/projects/openhab_shared/svg/habpanel/haus/',
+		'source': '/smartserver/data/projects/openhab_shared/svg/habpanel/haus/',
 		'grayscaled': [
-			'floor_attic','floor_first','floor_second','outside'
+			'floor_attic','floor_first','floor_second','outside','toolshed'
 		]
 	},
 	{
         'name': 'self',
-		'source': '/dataRaid/projects/openhab_shared/svg/habpanel/self/',
+		'source': '/smartserver/data/projects/openhab_shared/svg/habpanel/self/',
 		'grayscaled': [
             'window','sensor2','info','roomba','garden','loudspeaker','energy','wind','temperature','rain','radiatore','compass_circle','compass_needle','sun'
 		],
@@ -92,7 +91,7 @@ for config in configs:
 
 	for file in onlyfiles:
 		if(file[:1] != '.' and file[-3:] == 'svg'):
-			print "Processing file: " + file
+			print("Processing file: " + file)
 			
 			prefix = config['name']#basename(normpath(sourcePath))
 				
@@ -103,11 +102,13 @@ for config in configs:
 			
 			process_count += 1
 
+content = ET.tostring(top, encoding='unicode', method='xml')
+
 f = open("../conf/html/shared/habpanel/svg/icons.svg", 'w')
-f.write(ET.tostring(top,encoding='utf8', method='xml'))
+f.write(content)
 f.close()
 
 t2 = time.time()
-print "Done in " + str(t2-t1) + " seconds. Processed " + str(process_count) + " icons. Added " + str(symbol_count) + " icons."    
+print("Done in " + str(t2-t1) + " seconds. Processed " + str(process_count) + " icons. Added " + str(symbol_count) + " icons.")
 
  
