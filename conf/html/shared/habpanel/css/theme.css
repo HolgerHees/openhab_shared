@@ -138,6 +138,10 @@ body {
 
     --widget-error-color: red;
     --widget-warn-color: #ffa500;
+
+    --svg-rollershutter-closed-color: rgba(38,191,117,1.0);
+    --svg-rollershutter-advise-color: #ffa500;
+    --svg-window-open-color: red;
 }
 
 :root.blueTheme {
@@ -184,6 +188,10 @@ body {
     --widget-light-color: yellow;
 	--widget-error-color: red;
 	--widget-warn-color: #ffa500;
+
+    --svg-rollershutter-closed-color: rgba(56,121,217,1);
+    --svg-rollershutter-advise-color: #ffa500;
+    --svg-window-open-color: red;
 }
 
 :root.lightTheme {
@@ -226,13 +234,17 @@ body {
 	/*--dark-icon-color: rgba(124,175,215,0.3);*/
 
     --top-icon-color: rgba(124,175,215,0.9);
-    --sub-icon-color: rgba(124,175,215,0.9);
 
+    --svg-image-color: #7cafd7;
     --svg-image-color: #7cafd7;
 
     --widget-light-color: yellow;
 	--widget-error-color: red;
 	--widget-warn-color: #ffa500;
+
+    --svg-rollershutter-closed-color: rgba(124,175,215,1.0);
+    --svg-rollershutter-advise-color: #ffa500;
+    --svg-window-open-color: red;
 }
 
 html:-webkit-full-screen .header {
@@ -829,15 +841,15 @@ body,
 	fill: var(--widget-light-color);
 }
 .mvWidget .content.haus.shutterDownAdvise > svg.status .window.shutterAvailable {
-	fill: var(--widget-warn-color);
+	fill: var(--svg-rollershutter-advise-color);
 }
 .mvWidget .content.haus svg.status .window.shutterDown,
 .mvWidget .content.haus.shutterDownAdvise > svg.status .window.shutterAvailable.shutterDown {
-	fill: var(--svg-image-color);
+	fill: var(--svg-rollershutter-closed-color);
 }
 .mvWidget .content.haus svg.status .window.contactOpen,
 .mvWidget .content.haus svg.status .door.contactOpen {
-	fill: var(--widget-error-color) !important;
+	fill: var(--svg-window-open-color) !important;
 }
 .mvWidget .content.haus svg.status .room {
 	fill:rgba(150,150,0,0.0);
