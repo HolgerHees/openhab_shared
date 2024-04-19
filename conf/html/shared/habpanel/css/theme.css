@@ -1006,11 +1006,6 @@ body,
     --svg-weather-snowflake-stroke-width: 1px;
     --svg-weather-snowflake-fill: var(--widget-value-color-weather-snowflake);
 }
-.mvWidget .weatherForecast .sun {
-	stroke: var(--widget-value-color-weather-clouds);
-	stroke-width: 1px;
-	fill: none;
-}
 .mvWidget .weatherForecast .sun .day {
 	stroke-width: 1.2px;
 }
