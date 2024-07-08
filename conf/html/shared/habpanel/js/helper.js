@@ -234,7 +234,7 @@ var mvInitializer = function(){
                                 var mvClass = scope.$eval(attrs.mvClass,myVars);
 
                                 //console.log(mvClass);
-                                if( Array.isArray(mvClass) ) mvClass = mvClass[1];
+                                if( Array.isArray(mvClass) ) mvClass = mvClass[mvClass.length-1];
                                 
                                 var className = element[0].getAttribute("class");
                                 var classList = className == null ? [] : className.split(" ");

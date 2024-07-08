@@ -1012,31 +1012,89 @@ body,
 .mvWidget .weatherForecast .sun .night {
 	stroke-width: 1.4px;
 }
+
+.mvWidget .weatherForecast .details {
+    display: flex;
+    justify-content: space-between;
+}
+
+.mvWidget .weatherForecast .details .value.temperature {
+    display: flex;
+}
+
+.mvWidget .weatherForecast .details .value.bottom {
+    display: flex;
+    position: relative;
+}
+.mvWidget .weatherForecast .details .value.bottom .sun {
+    overflow: hidden;
+    width: 4vw;
+    height: 4vw;
+    margin-left: -5px;
+}
+.mvWidget .weatherForecast .details .value.bottom .precipitationProbability svg {
+    width: 0.8vw;
+    height: 0.8vw;
+    margin-top: 0.1vw;
+    margin-right: 2px;
+    stroke: var(--sub-icon-color);
+    fill: none;
+}
+.mvWidget .weatherForecast .details .value.bottom .precipitationProbability {
+    position: absolute;
+    right: 0;
+    bottom: 25px;
+}
+.mvWidget .weatherForecast .details .value.bottom .precipitationAmount {
+    position: absolute;
+    right: 0;
+    bottom: 5px;
+}
+.mvWidget .weatherForecast .details .value.bottom .value {
+    display: flex;
+    font-size: 0.9vw;
+}
+.mvWidget .weatherForecast .details .cell.title {
+    font-size: 1.0vw;
+    padding-bottom: 5px;
+}
+
+.mvWidget .weatherForecast .details .cell .temperature .sub {
+    font-size: 1.4vw;
+    line-height: 1.4vw;
+}
+.mvWidget .weatherForecast .details .cell .temperature .main {
+    font-size: 1.6vw;
+    font-weight: var(--widget-value-weight);
+    color: var(--widget-value-color-main);
+}
+
+.mvWidget .weatherForecast .summary {
+    margin-top: 10px;
+}
+
 .mvWidget .weatherForecast .summary,
 .mvWidget .weatherForecast .summary .cell {
     display: flex;
+    font-size: 1vw;
+    font-weight: var(--widget-value-weight);
+    color: var(--widget-text-color-nonimportant);
 }
+
 .mvWidget .weatherForecast .summary .bullet {
     font-size: 1vw;
     color: var(--widget-text-color-nonimportant);
     flex-grow: 1;
 }
 .mvWidget .weatherForecast .summary .cell {
-    justify-content: flex-end;
+    justify-content: space-between;
 }
-.mvWidget .weatherForecast .summary .cell:first-child {
-    justify-content: flex-start;
-}
-.mvWidget .weatherForecast .summary .txt {
-    font-size: 1vw;
-    padding-top: 2px;
-    color: var(--widget-text-color-nonimportant);
-}
+
 .mvWidget .weatherForecast .summary .icon {
     margin-left: 0.3vw;
     margin-right: 0.3vw;
-    width: 16px;
-    height: 16px;
+    width: 0.7vw;
+    height: 0.7vw;
     flex-grow: 0;
 }
 .mvWidget .weatherForecast .summary .icon svg {
@@ -1051,113 +1109,6 @@ body,
     filter: brightness(150%);
 }
 .mvWidget .weatherForecast .summary .icon.sun svg {
-	/*margin: 0px;*/
     filter: brightness(70%);
 }
-.mvWidget .weatherForecast .summary .value {
-    font-weight: var(--widget-value-weight);
-    white-space: nowrap;
-}
-.mvWidget .weatherForecast .summary .cell,
-.mvWidget .weatherForecast .summary .bullet {
-    margin-top: 1.1vw;
-    font-size: 1.2vw;
-    width: auto;
-}
-.mvWidget .weatherForecast .summary .bullet {
-    padding-left: 0.8vw;
-    padding-right: 0.8vw;
-}
-.mvWidget .weatherTodayForecast .headlines,
-.mvWidget .weatherTodayForecast .summary .cell,
-.mvWidget .weatherTodayForecast .summary .bullet {
-    border-top: 1px dashed var(--primary-light-color);
-}
-.mvWidget .weatherTodayForecast .headlines .cell,
-.mvWidget .weatherTodayForecast .summary .cell,
-.mvWidget .weatherTodayForecast .summary .bullet {
-    padding-top: 1.1vw;
-}
-.mvWidget .weatherTodayForecast .headlines .cell,
-.mvWidget .weatherTodayForecast .details .cell {
-    width: 25%;
-    margin-right: 5%;
-}
-.mvWidget .weatherTodayForecast .headlines .cell:last-child,
-.mvWidget .weatherTodayForecast .details .cell:last-child {
-    margin-right: 0%;
-}
-.mvWidget .weatherTodayForecast .headlines,
-.mvWidget .weatherTodayForecast .details {
-    display: flex;
-}
-.mvWidget .weatherTodayForecast .details .cell {
-    position: relative;
-    height: 7vw;
-}
-.mvWidget .weatherTodayForecast .details .cell .sun,
-.mvWidget .weatherTodayForecast .details .cell .time,
-.mvWidget .weatherTodayForecast .details .cell .temperature,
-.mvWidget .weatherTodayForecast .details .cell .precipitationProbability,
-.mvWidget .weatherTodayForecast .details .cell .precipitationAmount {
-    position: absolute;
-}
-.mvWidget .weatherTodayForecast .details .cell .temperature,
-.mvWidget .weatherTodayForecast .details .cell .precipitationProbability,
-.mvWidget .weatherTodayForecast .details .cell .precipitationAmount {
-    display: flex;
-    justify-content: flex-end;
-}
-.mvWidget .weatherTodayForecast .details .cell .sun {
-    overflow: hidden;
-    left: 0;
-    bottom: 0px;
-    width: 4vw;
-    height: 4vw;
-    margin-left: -3px;
-}
-.mvWidget .weatherTodayForecast .details .cell .time {
-    left: 0px;
-    top: 4px;
-    width: auto;
-    color: var(--widget-text-color-nonimportant);
-}
-.mvWidget .weatherTodayForecast .details .cell .time .from {
-    font-size: 1.2vw;
-    line-height: 1.2vw;
-}
-.mvWidget .weatherTodayForecast .details .cell .time .to {
-    font-size: 1.0vw;
-    line-height: 1.0vw;
-    text-align: left;
-}
-.mvWidget .weatherTodayForecast .details .cell .temperature {
-    right: 0;
-    top: 4px;
-}
-.mvWidget .weatherTodayForecast .details .cell .temperature .sub {
-    font-size: 1.4vw;
-    line-height: 1.4vw;
-}
-.mvWidget .weatherTodayForecast .details .cell .temperature .main {
-    font-size: 2vw;
-    font-weight: var(--widget-value-weight);
-    color: var(--widget-value-color-main);
-}
-.mvWidget .weatherTodayForecast .details .cell .precipitationProbability {
-    right: 0px;
-    bottom: 20px;
-}
-.mvWidget .weatherTodayForecast .details .value.precipitationProbability svg {
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    margin-right: 2px;
-    margin-top: -2px;
-    stroke: var(--sub-icon-color);
-    fill: none;
-}
-.mvWidget .weatherTodayForecast .details .cell .precipitationAmount {
-    right: 0px;
-    bottom: 0px;
-}
+

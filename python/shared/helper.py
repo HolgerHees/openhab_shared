@@ -235,8 +235,8 @@ class createTimer:
     def start(self):
         if not self.timer.isAlive():
             #log.info("timer started")
-            self.timer.start()
             activeTimer.append(self)
+            self.timer.start()
         else:
             #log.info("timer already started")
             pass
@@ -244,8 +244,8 @@ class createTimer:
     def cancel(self):
         if self.timer.isAlive():
             #log.info("timer stopped")
-            self.timer.cancel()
             activeTimer.remove(self)
+            self.timer.cancel()
         else:
             #log.info("timer not alive")
             pass
@@ -355,7 +355,7 @@ def getPreviousItemState(itemOrName):
 
 def getHistoricItemEntry(itemOrName, refDate):
     item = _getItem(itemOrName)
-    historicEntry = PersistenceExtensions.historicState(item, refDate, "jdbc")
+    historicEntry = PersistenceExtensions.persistedState(item, refDate, "jdbc")
     if historicEntry is None:
         raise NotInitialisedException(u"Item history for {} before {} not found".format(item.getName(),refDate))
     return historicEntry
