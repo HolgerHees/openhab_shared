@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
 
+from org.openhab.core.library.items import NumberItem
+
 from shared.helper import  sendCommandIfChanged, getItemState, getLanguage
 
 import importlib
@@ -428,11 +430,17 @@ class CommandProcessor:
         for tag in semantic_item.getItem().getTags():
             if tag not in SemanticConfig["answers"]:
                 continue
-            return SemanticConfig["answers"][tag].format(room=semantic_location.getItem().getLabel(),state=value)
+
+            answer = SemanticConfig["answers"][tag]["answer"]
+            unit = SemanticConfig["answers"][tag]["unit"]
+            if isinstance(semantic_item.getItem(), NumberItem):
+                if semantic_item.getItem().getUnit() is None:
+                    value = u"{} {}".format(value, unit)
+            return answer.format(room=semantic_location.getItem().getLabel(),state=value)
 
         semantic_reference = semantic_equipment if len(semantic_equipment.getChildren()) == 1 else semantic_item
 
-        return SemanticConfig["answers"]["Default"].format(equipment=semantic_reference.getItem().getLabel(),room=semantic_location.getItem().getLabel(),state=value)
+        return SemanticConfig["answers"]["Default"]["answer"].format(equipment=semantic_reference.getItem().getLabel(),room=semantic_location.getItem().getLabel(),state=value)
 
     def applyActions(self,actions,voice_command,dry_run):
         missing_locations = []

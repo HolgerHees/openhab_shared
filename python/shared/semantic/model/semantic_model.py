@@ -117,7 +117,10 @@ class SemanticModel:
         for semantic_item in self.semantic_items.values():
             if semantic_item.item.getType() == "Group":
                 children = semantic_item.item.getMembers()
+                #self.log.info("-------------")
+                #self.log.info(semantic_item.item.getName())
                 for item in children:
+                    #self.log.info(item.getName())
                     semantic_item.children.append(self.semantic_items[item.getName()])
 
                 if semantic_item.getSemanticType() == "Location":

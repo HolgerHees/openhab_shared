@@ -14,10 +14,10 @@ SemanticConfig = {
         "ok_message": "ok"
     },
     "answers": {
-        "Temperature": u"The temperature in the {room} is {state} °C",
-        "Humidity": u"The humidity in the {room} is {state} %",
-        #"Light": u"The light in the {room} is {state}",
-        "Default": u"{equipment} in the {room} is {state}"
+        "Temperature": { "answer": u"The temperature in the {room} is {state}", "unit": "°C" },
+        "Humidity": { "answer": u"The humidity in the {room} is {state}", "unit": "%" },
+        #"Light": { "answer": u"The light in the {room} is {state}"  },
+        "Default": { "answer": u"{equipment} in the {room} is {state}" }
     },
     "states": {
         "ON": "on",

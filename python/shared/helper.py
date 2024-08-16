@@ -68,7 +68,11 @@ class rule(object):
         def init(self, *args, **kwargs):
             SimpleRule.__init__(self)
             #proxy.set_uid_prefix(self,classPackage,filePackage)
-            clazz.__init__(self, *args, **kwargs)
+            try:
+                clazz.__init__(self, *args, **kwargs)
+            except Exception as e:
+                self.log.error("Rule init failed:\n" + traceback.format_exc())
+                raise e
 
             self.triggerItems = {}
             _triggers = []

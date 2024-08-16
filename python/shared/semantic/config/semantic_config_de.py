@@ -16,10 +16,9 @@ SemanticConfig = {
         "ok_message": "ok"
     },
     "answers": {
-        "Temperature": u"Die Temperatur im {room} beträgt {state} °C",
-        "Humidity": u"Die Luftfeuchtigkeit im {room} beträgt {state} %",
-        #"Light": u"Das Licht im {room} ist {state}",
-        "Default": u"{equipment} im {room} ist {state}"
+        "Temperature": { "answer": u"Die Temperatur im {room} beträgt {state}", "unit": "°C" },
+        "Humidity": { "answer": u"Die Luftfeuchtigkeit im {room} beträgt {state}", "unit": "%" },
+        "Default": { "answer": u"{equipment} im {room} ist {state}" }
     },
     "states": {
         "ON": "on",
