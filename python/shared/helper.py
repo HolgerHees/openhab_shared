@@ -181,7 +181,7 @@ class rule(object):
                     self.log.debug(msg)
 
             except NotInitialisedException as e:
-                self.log.warn("Rule skipped: " + str(e))
+                self.log.warn("Rule skipped: " + str(e) + " \n" + traceback.format_exc())
             except:
                 self.log.error("Rule execution failed:\n" + traceback.format_exc())
 
@@ -231,7 +231,12 @@ class createTimer:
     def handler(self):
         try:
             self.callback(*self.args, **self.kwargs)
-            activeTimer.remove(self)
+            try:
+                activeTimer.remove(self)
+            except ValueError:
+                # can happen when timer is executed and canceled at the same time
+                # could be solved with a LOCK, but this solution is more efficient, because it works without a LOCK
+                pass
         except:
             self.log.error(u"{}".format(traceback.format_exc()))
             raise
