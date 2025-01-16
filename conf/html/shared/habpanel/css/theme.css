@@ -591,7 +591,6 @@ body,
 .mvWidget.mvStatus > div,
 .mvWidget.mvStatus > div .value {
     display: flex;
-    justify-content: flex-end;
 }
 .mvWidget.mvStatus > div .icon {
     height: var(--widget-value-size);
@@ -635,8 +634,16 @@ body,
     fill-opacity: 0.3;
 }
 
-.mvWidget.mvStatus > div .value {
+.mvWidget.mvStatus > div div.value {
     flex-grow: 1;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.mvWidget.mvStatus > div div.value > div > span {
+    display: inline-block;
+}
+
+.mvWidget.mvStatus > div .value {
     font-size: var(--widget-value-size);
     line-height: var(--widget-value-size);
 }

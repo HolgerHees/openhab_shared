@@ -55,7 +55,7 @@ SemanticConfig = {
         "COLOR_TEMPERATURE": [
             { "value": "REGEX", "search": [u"({})"], "types": ["Dimmer"], "tags": ["ColorTemperature"] }
         ],
-        "READ": [ 
+        "READ": [
             { "value": "READ", "search": ["wie","wieviel","was","ist","sind"],
                 "synonyms": {
                     "warm": "temperatur",
@@ -64,7 +64,7 @@ SemanticConfig = {
                     "trocken": "feuchtigkeit",
                     "luftfeuchtigkeit": "feuchtigkeit",
                 }
-            } 
+            }
         ]
     },
     "mappings": {      
