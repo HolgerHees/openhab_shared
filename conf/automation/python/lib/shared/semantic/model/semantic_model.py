@@ -1,9 +1,11 @@
+from openhab import logger, Registry
+
 import java
 import json
 import re
 import io
-from openhab import logger, Registry
-from shared.toolbox import ToolboxHelper
+import locale
+
 
 #https://github.com/openhab/openhab-core/blob/master/bundles/org.openhab.core.semantics/model/SemanticTags.csv
     
@@ -56,7 +58,7 @@ class SemanticModel:
         # maybe it's possible to get the tags from bundle https://github.com/openhab/openhab-core/tree/main/bundles/org.openhab.core.semantics/src/main/resources
         # but ignore the first (the comment) line when parse file content bellow
         tag_file = "/openhab/conf/automation/python/lib/shared/semantic/config/tags.txt"
-        language = ToolboxHelper.getLanguage()
+        language = locale.getlocale()[0].split("_")[0]
         if language != "en":
             tag_file = "/openhab/conf/automation/python/lib/shared/semantic/config/tags_" + language +".txt"
         f = io.open(tag_file, "r", encoding="utf-8")

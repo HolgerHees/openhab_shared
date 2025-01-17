@@ -1,15 +1,14 @@
 from openhab import logger, Registry
 
-from shared.toolbox import ToolboxHelper
-
 import java
 import re
 import importlib
+import locale
 
 Java_NumberItem = java.type("org.openhab.core.library.items.NumberItem")
 
 module_name = "shared.semantic.config.semantic_config"
-language = ToolboxHelper.getLanguage()
+language = locale.getlocale()[0].split("_")[0]
 if language != "en":
     module_name = module_name + "_" + language
 

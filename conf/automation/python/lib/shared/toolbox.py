@@ -4,8 +4,6 @@ from openhab.services import get_service
 from datetime import datetime, timedelta
 
 
-LOCATION_PROVIDER = get_service("org.openhab.core.i18n.LocaleProvider")
-
 class NotInitialisedException(Exception):
     pass
 
@@ -79,10 +77,6 @@ class ToolboxHelper:
     @staticmethod
     def getStableState(item_or_item_name, time_slot, end_time = None):
         return Registry.resolveItem(item_or_item_name).getPersistance("jdbc").getStableState(time_slot, end_time)
-
-    @staticmethod
-    def getLanguage():
-        return LOCATION_PROVIDER.getLocale().getLanguage()
 
     @staticmethod
     def isMember(item_or_item_name, group_name):
