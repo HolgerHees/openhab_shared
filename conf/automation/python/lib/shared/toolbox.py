@@ -28,7 +28,7 @@ class ToolboxHelper:
     def getPersistedEntry(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").persistedState(at_time)
         if entry is None:
-            raise NotInitialisedException("Item history for {} before {} not found".format(ToolboxHelper._resolveItemName(ToolboxHelper._resolveItemName(item_or_item_name,at_time))
+            raise NotInitialisedException("Item history for {} before {} not found".format(TToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry
 
     @staticmethod
@@ -60,14 +60,14 @@ class ToolboxHelper:
     def getMaximumSince(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").maximumSince(at_time)
         if entry is None:
-            raise NotInitialisedException("Item max state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name,at_time))
+            raise NotInitialisedException("Item max state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry.getState()
 
     @staticmethod
     def getMinimumSince(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").minimumSince(at_time)
         if entry is None:
-            raise NotInitialisedException("Item min state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name,at_time))
+            raise NotInitialisedException("Item min state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry.getState()
 
     @staticmethod
