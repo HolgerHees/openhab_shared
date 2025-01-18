@@ -28,7 +28,7 @@ class ToolboxHelper:
     def getPersistedEntry(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").persistedState(at_time)
         if entry is None:
-            raise NotInitialisedException("Item history for {} before {} not found".format(item_or_item_name,at_time))
+            raise NotInitialisedException("Item history for {} before {} not found".format(ToolboxHelper._resolveItemName(ToolboxHelper._resolveItemName(item_or_item_name,at_time))
         return entry
 
     @staticmethod
@@ -45,7 +45,7 @@ class ToolboxHelper:
     def getLastChange(item_or_item_name):
         lastChange = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").lastUpdate()
         if lastChange is None:
-            raise NotInitialisedException("Item lastChange for '" + item_or_item_name + "' not found")
+            raise NotInitialisedException("Item lastChange for {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name)))
         return lastChange
 
     @staticmethod
@@ -60,14 +60,14 @@ class ToolboxHelper:
     def getMaximumSince(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").maximumSince(at_time)
         if entry is None:
-            raise NotInitialisedException("Item max state for {} before {} not found".format(entry,at_time))
+            raise NotInitialisedException("Item max state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name,at_time))
         return entry.getState()
 
     @staticmethod
     def getMinimumSince(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").minimumSince(at_time)
         if entry is None:
-            raise NotInitialisedException("Item min state for {} before {} not found".format(entry,at_time))
+            raise NotInitialisedException("Item min state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name,at_time))
         return entry.getState()
 
     @staticmethod
@@ -83,3 +83,8 @@ class ToolboxHelper:
         group_names = Registry.getItem(item_or_item_name).getGroupNames()
         return group_name in group_names
 
+    @staticmethod
+    def _resolveItemName(item_or_item_name):
+        if isinstance(item_or_item_name, str):
+            return item_or_item_name
+        return item_or_item_name.getName()
