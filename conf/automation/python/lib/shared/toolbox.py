@@ -43,10 +43,14 @@ class ToolboxHelper:
 
     @staticmethod
     def getLastChange(item_or_item_name):
-        lastChange = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").lastUpdate()
-        if lastChange is None:
-            raise NotInitialisedException("Item lastChange for {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name)))
-        return lastChange
+        persistance = Registry.resolveItem(item_or_item_name).getPersistance("jdbc")
+        last_change = persistance.lastUpdate()
+        if last_change is None:
+            previous_state = persistance.previousState() # https://community.openhab.org/t/item-persistence-lastupdate-not-always-working/158534
+            if previous_state is None:
+                raise NotInitialisedException("Item lastChange for {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name)))
+            last_change = previous_state.getTimestamp()
+        return last_change
 
     @staticmethod
     def getLastUpdate(item_or_item_name):
