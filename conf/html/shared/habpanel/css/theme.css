@@ -686,10 +686,28 @@ body,
     margin: 0 0 0 4px;
 }
 
-.mvWidget.mvHouse div.warn .value > div:first-child {
+.mvWidget.mvHouse div.co2_marker > div {
+    width: 20px;
+    height: 20px;
+    font-size: var(--widget-value-size);
+    font-weight: var(--widget-value-weight);
+    color: var(--sub-icon-color);
+}
+.mvWidget.mvHouse div.co2_marker.warn div  {
+    color: var(--widget-warn-color);
+    font-weight: bold;
+}
+.mvWidget.mvHouse div.co2_marker.error div {
+    color: var(--widget-error-color);
+    font-weight: bold;
+}
+
+.mvWidget.mvHouse div.warn {
+    font-weight: bold;
     color: var(--widget-warn-color);
 }
-.mvWidget.mvHouse div.error .value > div:first-child {
+.mvWidget.mvHouse div.error {
+    font-weight: bold;
     color: var(--widget-error-color);
 }
 
@@ -790,7 +808,7 @@ body,
 }
 
 .mvWidget.mvHouse.heatingActive div .value.room_state.main.circuitActive {
-    color: green;
+    color: var(--sub-icon-color);
 }
 
 .mvWidget.mvHouse div .value.room_state.small > div:first-child {
