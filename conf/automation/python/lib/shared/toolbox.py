@@ -26,7 +26,7 @@ class ToolboxHelper:
 
     @staticmethod
     def getPersistedEntry(item_or_item_name, at_time):
-        entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").persistedState(at_time)
+        entry = Registry.resolveItem(item_or_item_name).getPersistence("jdbc").persistedState(at_time)
         if entry is None:
             raise NotInitialisedException("Item history for {} before {} not found".format(TToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry
@@ -43,10 +43,10 @@ class ToolboxHelper:
 
     @staticmethod
     def getLastChange(item_or_item_name):
-        persistance = Registry.resolveItem(item_or_item_name).getPersistance("jdbc")
-        last_change = persistance.lastUpdate()
+        persistence = Registry.resolveItem(item_or_item_name).getPersistence("jdbc")
+        last_change = persistence.lastUpdate()
         if last_change is None:
-            previous_state = persistance.previousState() # https://community.openhab.org/t/item-persistence-lastupdate-not-always-working/158534
+            previous_state = persistence.previousState() # https://community.openhab.org/t/item-persistence-lastupdate-not-always-working/158534
             if previous_state is None:
                 raise NotInitialisedException("Item lastChange for {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name)))
             last_change = previous_state.getTimestamp()
@@ -54,7 +54,7 @@ class ToolboxHelper:
 
     @staticmethod
     def getLastUpdate(item_or_item_name):
-        last_update = Registry.resolveItem(item_or_item_name).getPersistance().lastUpdate()
+        last_update = Registry.resolveItem(item_or_item_name).getPersistence().lastUpdate()
         if last_update is None:
             return datetime.now().astimezone()
             #raise NotInitialisedException("Item lastUpdate for '" + item_or_item_name + "' not found")
@@ -62,25 +62,25 @@ class ToolboxHelper:
 
     @staticmethod
     def getMaximumSince(item_or_item_name, at_time):
-        entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").maximumSince(at_time)
+        entry = Registry.resolveItem(item_or_item_name).getPersistence("jdbc").maximumSince(at_time)
         if entry is None:
             raise NotInitialisedException("Item max state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry.getState()
 
     @staticmethod
     def getMinimumSince(item_or_item_name, at_time):
-        entry = Registry.resolveItem(item_or_item_name).getPersistance("jdbc").minimumSince(at_time)
+        entry = Registry.resolveItem(item_or_item_name).getPersistence("jdbc").minimumSince(at_time)
         if entry is None:
             raise NotInitialisedException("Item min state for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry.getState()
 
     @staticmethod
     def getStableMinMaxState(item_or_item_name, time_slot, end_time = None):
-        return Registry.resolveItem(item_or_item_name).getPersistance("jdbc").getStableMinMaxState(time_slot, end_time)
+        return Registry.resolveItem(item_or_item_name).getPersistence("jdbc").getStableMinMaxState(time_slot, end_time)
 
     @staticmethod
     def getStableState(item_or_item_name, time_slot, end_time = None):
-        return Registry.resolveItem(item_or_item_name).getPersistance("jdbc").getStableState(time_slot, end_time)
+        return Registry.resolveItem(item_or_item_name).getPersistence("jdbc").getStableState(time_slot, end_time)
 
     @staticmethod
     def isMember(item_or_item_name, group_name):
