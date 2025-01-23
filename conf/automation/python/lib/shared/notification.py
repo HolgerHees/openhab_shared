@@ -1,3 +1,4 @@
+from openhab import logger
 from openhab.jsr223 import scope
 from configuration import userConfigs
 
@@ -19,7 +20,7 @@ class NotificationHelper:
             elif notification_type == "pushover":
                 success = action.sendMessage(message, header, mapped_sound, None, None, None, None, mapped_priority, notification_config[2], None )
             else:
-                log.error("Unknown notification type {}".format(notification_type))
+                logger.error("Unknown notification type {}".format(notification_type))
                 success = None
         else:
             if notification_type == "telegram":
@@ -28,12 +29,12 @@ class NotificationHelper:
                 #sendMessage(String message, @Nullable String title, @Nullable String sound, @Nullable String url, @Nullable String urlTitle, @Nullable String attachment, @Nullable String contentType, @Nullable Integer priority, @Nullable String device, @Nullable Duration ttl)
                 success = action.sendMessage(message, header, mapped_sound, None, None, url, None, mapped_priority, notification_config[2], None )
             else:
-                log.error("Unknown notification type {}".format(notification_type))
+                logger.error("Unknown notification type {}".format(notification_type))
                 success = None
 
         if not success and success is not None and retry < 5:
             waiting_time = retry * 5
-            log.info("Failed to send message '{}: {}'. Retry in {} seconds.".format(header, message, waiting_time))
+            logger.info("Failed to send message '{}: {}'. Retry in {} seconds.".format(header, message, waiting_time))
             time.sleep(waiting_time)
             success = NotificationHelper._sendNotification(notification_config, notification_type, mapped_sound, mapped_priority, action, header, message, url, retry + 1)
 
@@ -62,7 +63,7 @@ class NotificationHelper:
             action = scope.get("actions").get(notification_type, notification_thing)
 
             if action is None:
-                log.warn("No Action found, Type: '{}', Thing: '{}'".format(notification_type, notification_thing))
+                logger.warn("No Action found, Type: '{}', Thing: '{}'".format(notification_type, notification_thing))
                 continue
 
             if notification_type == "pushover":
@@ -86,7 +87,7 @@ class NotificationHelper:
             success = NotificationHelper._sendNotification(notification_config, notification_type, mapped_sound, mapped_priority, action, header, message, url)
             if not success:
                 caller = getframeinfo(stack()[1][0])
-                log.error("Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
+                logger.error("Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
 
     @staticmethod
     def sendNotificationToAllAdmins(priority, header, message, url=None):
