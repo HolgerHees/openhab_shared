@@ -9,14 +9,6 @@ class NotInitialisedException(Exception):
 
 class ToolboxHelper:
     @staticmethod
-    def getGroupMemberTrigger(clazz, group_or_group_name, state=None, trigger_name=None):
-        triggers = []
-        group_member = Registry.resolveItem(group_or_group_name).getAllMembers()
-        for item in group_member:
-            triggers.append(clazz(item.getName(), state=state, trigger_name=trigger_name))
-        return triggers
-
-    @staticmethod
     def getFilteredGroupMember(group_or_group_name, state):
         group_member = Registry.resolveItem(group_or_group_name).getAllMembers()
         if isinstance(state, list):

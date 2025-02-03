@@ -12,7 +12,7 @@ var mvInitializer = function(){
         
         domain = parts.join(".");
     }
-                        
+
     if(typeof angular === "undefined")
     {
         setTimeout(mvInitializer, 50);
@@ -1235,16 +1235,27 @@ var mvInitializer = function(){
                 restrict: 'AE',
                 template: '<div><img></div>',
                 link: function(scope, element, attrs) {
-                    var inlineUrl = "//" + authType + domain + "/" + scope.ngModel.config.imageUrl;
-                    var popupUrl = scope.ngModel.config.streamUrl ? "//" + authType + domain + "/" + scope.ngModel.config.streamUrl : null;
+                    var subdomain = "//" + authType + scope.ngModel.config.subdomain + '.' + domain;
+
+                    var inlineUrl = subdomain + scope.ngModel.config.imageUrl;
+                    var streamUrl = scope.ngModel.config.streamUrl ? "wss:" + subdomain + scope.ngModel.config.streamUrl : "";
                     var inlineRefreshInterval = scope.ngModel.config.imageRefresh;
                     var imageWidth = 0;
                     var imageHeight = 0;
                     var timeoutRef = null;
-                    
+
+                    var containerElement = element[0].firstChild;
+                    var imageElement = containerElement.firstChild;
+                    var videoElement = null;
+                    var videoHandler = null;
+
+                    var isFullscreen = false;
+
                     function setUrl( element, url, interval, width, height, timeoutRef, callback )
                     {
                         let _url = url;
+
+                        if( height == 0 ) height = 1024;
                         
                         _url += ( _url.indexOf("?") == -1 ? "?" : "&" ) + 'time=' + ( new Date().getTime() );
 
@@ -1264,22 +1275,21 @@ var mvInitializer = function(){
 
                             if( this.status == 200 )
                             {
-                                var image = element[0].firstChild.firstChild;
                                 var imageURL = window.URL.createObjectURL(this.response);
-                                image.onload = function()
+                                imageElement.onload = function()
                                 {
                                     sessionStorage.setItem('mvWidgetImagePopup.inlineUrl_'+inlineUrl, _url);
 
                                     const duration = performance.now() - startTime;
                                     callback(duration, timeoutRef);
                                 }
-                                image.onerror = function(event)
+                                imageElement.onerror = function(event)
                                 {
                                     console.error("Image loading error");
                                     const duration = performance.now() - startTime;
                                     callback(duration, timeoutRef);
                                 }
-                                image.src = imageURL;
+                                imageElement.src = imageURL;
                             }
                             else
                             {
@@ -1305,21 +1315,36 @@ var mvInitializer = function(){
 
                         handleTrigger();
                     }
+
+                    function handleVideoCleanup()
+                    {
+                        if( videoElement != null )
+                        {
+                            imageElement.style.display="";
+                            videoHandler.cleanup();
+                            containerElement.removeChild(videoElement);
+                            videoElement = null;
+                        }
+                    }
                     
                     function togglePopup( element, forceInline )
                     {
                         $timeout.cancel(timeoutRef);
                         timeoutRef = null;
 
-                        if( forceInline || element[0].firstChild.classList.contains("popup") )
+                        if( forceInline || containerElement.classList.contains("popup") )
                         {
-                            if( element[0].firstChild.classList.contains("popup") )
+                            isFullscreen = false;
+
+                            if( containerElement.classList.contains("popup") )
                             {
-                                element[0].firstChild.style.inset = element[0].firstChild.dataset.inset;
-                                element[0].firstChild.style.backgroundColor = "";
+                                handleVideoCleanup();
+
+                                containerElement.style.inset = containerElement.dataset.inset;
+                                containerElement.style.backgroundColor = "";
                                 window.setTimeout(function(){
-                                    element[0].firstChild.style.inset = "";
-                                    element[0].firstChild.classList.remove("popup");
+                                    containerElement.style.inset = "";
+                                    containerElement.classList.remove("popup");
                                 },500);
                             }
 
@@ -1327,21 +1352,38 @@ var mvInitializer = function(){
                         }
                         else
                         {
-                            element[0].firstChild.classList.add("popup");
-                            element[0].firstChild.style.inset = element[0].firstChild.dataset.inset;
+                            isFullscreen = true;
+
+                            containerElement.classList.add("popup");
+                            containerElement.style.inset = containerElement.dataset.inset;
 
                             window.setTimeout(function(){
-                                element[0].firstChild.style.inset = "0 0 0 0";
-                                element[0].firstChild.style.backgroundColor = "rgba(0,0,0,0.9)";
+                                containerElement.style.inset = "0 0 0 0";
+                                containerElement.style.backgroundColor = "rgba(0,0,0,0.9)";
                             },50);
 
-                            if( popupUrl )
+                            if( streamUrl )
                             {
-                                element[0].firstChild.firstChild.src = popupUrl;
+                                setUrl(imageElement, inlineUrl, 1, 0, 0, timeoutRef, function(){
+                                    videoElement = document.createElement("video");
+                                    videoElement.setAttribute("style", "display:none;max-height:100%;max-width:100%;width:100%;height:100%;object-fit:contain;");
+                                    containerElement.appendChild(videoElement);
+                                    window.setTimeout(function(){
+                                        if( !isFullscreen ) return;
+                                        videoElement.addEventListener("loadeddata", function() {
+                                            if( !isFullscreen ) return;
+                                            videoElement.style.display="";
+                                            imageElement.style.display="none";
+                                        });
+                                        videoHandler = mvVideo.build(videoElement, streamUrl);
+                                    },0);
+                                });
                             }
                             else
                             {
-                                handleImageRefresh(element, inlineUrl, 1, 0, 0);
+                                handleVideoCleanup();
+
+                                handleImageRefresh(element, inlineUrl, 0.5, 0, 0);
                             }
                         }
                     }
