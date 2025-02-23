@@ -1,5 +1,4 @@
 from openhab import Registry
-from openhab.services import get_service
 
 from datetime import datetime, timedelta
 

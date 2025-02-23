@@ -1,6 +1,9 @@
 from openhab import logger
-from openhab.jsr223 import scope
 from configuration import userConfigs
+
+import scope
+
+import time
 
 
 class NotificationHelper:
@@ -60,7 +63,7 @@ class NotificationHelper:
             notification_type = notification_config[0]
             notification_thing = notification_config[1]
 
-            action = scope.get("actions").get(notification_type, notification_thing)
+            action = scope.actions.get(notification_type, notification_thing)
 
             if action is None:
                 logger.warn("No Action found, Type: '{}', Thing: '{}'".format(notification_type, notification_thing))

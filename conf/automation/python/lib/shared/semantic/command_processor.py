@@ -5,7 +5,7 @@ import re
 import importlib
 import locale
 
-Java_NumberItem = java.type("org.openhab.core.library.items.NumberItem")
+from org.openhab.core.library.items import NumberItem as Java_NumberItem
 
 module_name = "shared.semantic.config.semantic_config"
 language = locale.getlocale()[0].split("_")[0]
