@@ -32,24 +32,24 @@ class ToolboxHelper:
         previousEntry = ToolboxHelper.getPersistedEntry(item_or_item_name, entry.getTimestamp() - timedelta(microseconds=1))
         return previousEntry.getState()
 
-    @staticmethod
-    def getLastChange(item_or_item_name):
-        persistence = Registry.resolveItem(item_or_item_name).getPersistence("jdbc")
-        last_change = persistence.lastUpdate()
-        if last_change is None:
-            previous_state = persistence.previousState() # https://community.openhab.org/t/item-persistence-lastupdate-not-always-working/158534
-            if previous_state is None:
-                raise NotInitialisedException("Item lastChange for {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name)))
-            last_change = previous_state.getTimestamp()
-        return last_change
+    #@staticmethod # deprecated since openhab 5
+    #def getLastChange(item_or_item_name):
+    #    persistence = Registry.resolveItem(item_or_item_name).getPersistence("jdbc")
+    #    last_change = persistence.lastUpdate()
+    #    if last_change is None:
+    #        previous_state = persistence.previousState() # https://community.openhab.org/t/item-persistence-lastupdate-not-always-working/158534
+    #        if previous_state is None:
+    #            raise NotInitialisedException("Item lastChange for {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name)))
+    #        last_change = previous_state.getTimestamp()
+    #    return last_change
 
-    @staticmethod
-    def getLastUpdate(item_or_item_name):
-        last_update = Registry.resolveItem(item_or_item_name).getPersistence().lastUpdate()
-        if last_update is None:
-            return datetime.now().astimezone()
-            #raise NotInitialisedException("Item lastUpdate for '" + item_or_item_name + "' not found")
-        return last_update
+    #@staticmethod # deprecated since openhab 5
+    #def getLastUpdate(item_or_item_name):
+    #    last_update = Registry.resolveItem(item_or_item_name).getPersistence().lastUpdate()
+    #    if last_update is None:
+    #        return datetime.now().astimezone()
+    #        #raise NotInitialisedException("Item lastUpdate for '" + item_or_item_name + "' not found")
+    #    return last_update
 
     @staticmethod
     def getMaximumSince(item_or_item_name, at_time):

@@ -94,11 +94,12 @@ class SemanticModel:
                         semantic_properties.append(item_tag)
                   
             #[u'semantics', u'synonyms']
-            synonyms = Registry.getItemMetadata(item.getName(), "synonyms")
+
+            synonyms = item.getMetadata().get("synonyms")
             synonym_search = synonyms.getValue().lower().split(",") if synonyms is not None else []
             synonym_search = list(map(str.strip, synonym_search))
             
-            answer = Registry.getItemMetadata(item.getName(), "answer")
+            answer = item.getMetadata().get("answer")
             answer = answer.getValue() if answer is not None else None
 
             semantic_item = SemanticItem(item,semantic_type,semantic_properties,tags_search,synonym_search,answer)
