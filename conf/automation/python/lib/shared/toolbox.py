@@ -19,7 +19,7 @@ class ToolboxHelper:
     def getPersistedEntry(item_or_item_name, at_time):
         entry = Registry.resolveItem(item_or_item_name).getPersistence("jdbc").persistedState(at_time)
         if entry is None:
-            raise NotInitialisedException("Item history for {} before {} not found".format(TToolboxHelper._resolveItemName(item_or_item_name),at_time))
+            raise NotInitialisedException("Item history for {} before {} not found".format(ToolboxHelper._resolveItemName(item_or_item_name),at_time))
         return entry
 
     @staticmethod
