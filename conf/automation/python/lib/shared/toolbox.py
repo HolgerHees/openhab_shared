@@ -32,6 +32,11 @@ class ToolboxHelper:
         previousEntry = ToolboxHelper.getPersistedEntry(item_or_item_name, entry.getTimestamp() - timedelta(microseconds=1))
         return previousEntry.getState()
 
+    @staticmethod
+    def getAllStatesSince(item_or_item_name, at_time):
+        return Registry.resolveItem(item_or_item_name).getPersistence("jdbc").getAllStatesSince(at_time)
+
+
     #@staticmethod # deprecated since openhab 5
     #def getLastChange(item_or_item_name):
     #    persistence = Registry.resolveItem(item_or_item_name).getPersistence("jdbc")

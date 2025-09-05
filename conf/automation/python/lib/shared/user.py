@@ -3,8 +3,8 @@ import java
 from openhab import logger, Registry
 from configuration import userConfigs
 
+import scope
 
-Java_OnOffType = java.type("org.openhab.core.library.types.OnOffType")
 
 class UserHelper:
     @staticmethod
@@ -29,7 +29,7 @@ class UserHelper:
             if not userConfigs[userName]["state_item"]:
                 continue
             stateItem = Registry.getItem(userConfigs[userName]["state_item"])
-            if stateItem.getState() != Java_OnOffType.ON:
+            if stateItem.getState() != scope.ON:
                 continue
             usernames[userName] = stateItem
         return usernames
