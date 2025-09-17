@@ -840,10 +840,6 @@ body,
 .mvWidget.mvHouse div .value.room_state.sub:after {
     content:")"
 }
-
-
-
-
 .mvWidget .content.haus svg.status .room {
 	z-index: 100;
 }
@@ -928,6 +924,71 @@ body,
 .mvWidget .content.haus .info .gas div.top .sub {
     font-size: 1.0vw;
 	line-height: 1.0vw;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .arrow {
+    margin:0px !important;
+    width:25px;
+    height:25px;
+    stroke: var(--sub-icon-color);
+    fill: rgba(38,191,117,.60);
+    visibility: hidden;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .arrowLeft {
+    transform: rotate(90deg);
+    visibility: visible;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .arrowTop {
+    transform: rotate(180deg);
+    visibility: visible;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .arrowRight {
+    transform: rotate(270deg);
+    visibility: visible;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .arrowBottom {
+    visibility: visible;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .gridDefault {
+    stroke: rgba(38,191,117,.50);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .gridActive {
+    stroke: var(--sub-icon-color);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .solarDefault {
+    stroke: rgba(38,191,117,.50);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .solarActive {
+    stroke: var(--sub-icon-color);
+    fill: rgba(150,150,0,0.5);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .consumptionDefault {
+    stroke: var(--sub-icon-color);
+    fill: rgba(150,150,0,0.8);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .batteryDefault {
+    stroke: rgba(38,191,117,.30);
+    fill: rgba(38,191,117,.30);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .batteryDefault .batteryLevel {
+    position:absolute;
+    left:0;
+    fill: rgba(38,191,117,.30);
+    stroke: none;
+}
+.mvWidget.mvHouse div .value.room_state.solarState .batteryCharge,
+.mvWidget.mvHouse div .value.room_state.solarState .batteryDischarge {
+    stroke: rgba(38,191,117,.50);
+}
+.mvWidget.mvHouse div .value.room_state.solarState .batteryCharge .batteryLevel,
+.mvWidget.mvHouse div .value.room_state.solarState .batteryDischarge .batteryLevel {
+    fill: rgba(38,191,117,.50);
+}
+.mvWidget.mvHouse div .value.room_state.solarState {
+    font-size: 1.2vw;
+    position:absolute;
+}
+.mvWidget.mvHouse div .value.room_state.solarState > div {
+    position:absolute;
 }
 .mvWidget .weatherForecast svg {
     --svg-weather-mask-fill: black;

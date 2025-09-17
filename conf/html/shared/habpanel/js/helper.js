@@ -191,6 +191,7 @@ var mvInitializer = function(){
                             if( attrs.mvIf != undefined ) attrs.mvIf = attrs.mvIf.replace('config.' + config['id'], "'" + scope.ngModel.config[ config['id'] ] + "'" );
                             if( attrs.mvContent != undefined ) attrs.mvContent = attrs.mvContent.replace('config.' + config['id'], "'" + scope.ngModel.config[ config['id'] ] + "'" );
                             if( attrs.mvClass != undefined ) attrs.mvClass = attrs.mvClass.replace('config.' + config['id'], "'" + scope.ngModel.config[ config['id'] ] + "'" );
+                            if( attrs.mvAttribute != undefined ) attrs.mvAttribute = attrs.mvAttribute.replace('config.' + config['id'], "'" + scope.ngModel.config[ config['id'] ] + "'" );
                         }
                     }
                     
@@ -246,6 +247,15 @@ var mvInitializer = function(){
                                 
                                 var newClassName = classList.join(" ");
                                 if( newClassName != className ) element[0].setAttribute("class", newClassName );
+                            }
+
+                            if( attrs.mvAttribute != undefined && isItemUsed( scope, updatedItemName, attrs.mvAttribute, checkVars, myVars ) )
+                            {
+                                var mvAttribute = scope.$eval(attrs.mvAttribute,myVars);
+                                for (var key in mvAttribute)
+                                {
+                                    element[0].setAttribute(key, mvAttribute[key]);
+                                }
                             }
                         });
                     });
