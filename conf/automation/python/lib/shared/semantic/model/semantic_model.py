@@ -64,6 +64,8 @@ class SemanticModel:
         f = io.open(tag_file, "r", encoding="utf-8")
         lines = f.readlines()
         for line in lines:
+            if line[0] == '#':
+                continue
             keys,synonyms = line.strip().split("=")
             keys = keys.split("_")
             synonyms = synonyms.lower().split(",")

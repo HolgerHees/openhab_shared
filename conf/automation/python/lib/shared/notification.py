@@ -1,9 +1,10 @@
+import inspect
+import time
+
 from openhab import logger
 from configuration import userConfigs
 
 import scope
-
-import time
 
 
 class NotificationHelper:
@@ -89,7 +90,7 @@ class NotificationHelper:
 
             success = NotificationHelper._sendNotification(notification_config, notification_type, mapped_sound, mapped_priority, action, header, message, url)
             if not success:
-                caller = getframeinfo(stack()[1][0])
+                caller = inspect.getframeinfo(stack()[1][0])
                 logger.error("Failed to send message '{}: {}' from {}:{}".format(header, message, caller.filename, caller.lineno))
 
     @staticmethod
