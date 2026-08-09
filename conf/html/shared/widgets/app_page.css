@@ -263,7 +263,7 @@ li.setpoint .item-after > div {
 }
 li.setpoint .stepper > div {
   height: var(--custom-default-button-height) !important;
-  min-width: calc(var(--custom-default-button-height) + 5px) !important;
+  min-width: calc(var(--custom-default-button-height) + 8px) !important;
   box-sizing:border-box;
   border-radius: 0;
   border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
@@ -328,7 +328,7 @@ li.rollershutter .segmented {
 }
 li.rollershutter .segmented .button {
   height: var(--custom-default-button-height) !important;
-  min-width: calc(var(--custom-default-button-height) + 5px) !important;
+  min-width: calc(var(--custom-default-button-height) + 8px) !important;
   box-sizing:border-box;
   border-radius: 0;
   border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
@@ -371,6 +371,7 @@ li.text .value {
 }
 li.text .value .icon {
   margin-bottom: -3px;
+  margin-right: -5px;
 }
 
 /********** UI INPUT ****************/
