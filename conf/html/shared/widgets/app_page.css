@@ -1,0 +1,541 @@
+:root {
+  --custom-green: #4ab516;
+  --custom-green-dark: #4ab51677;
+  --custom-yellow: #ffdf6f;
+  --custom-yellow-dark: #ffdf6f55;
+  --custom-red: #ff0000;
+  --custom-red-dark: #ff000077;
+  --custom-blue: #4285c7;
+  --custom-blue-dark: #4285c788;
+
+  --custom-accent-color: var(--custom-blue);
+  --custom-accent-color-dark: var(--custom-blue-dark);
+
+  --custom-default-color: #FFFFFFAA; /*white; var(--f7-card-footer-text-color);*/
+  --custom-value-color: #FFFFFF; /*white; var(--f7-card-footer-text-color);*/
+  --custom-control-color: #FFFFFFDE;
+  --custom-error-state: var(--custom-red);
+  --custom-warn-state: #ffa500;
+  --custom-active-state: var(--custom-green);
+  --custom-default-state: var(--custom-value-color);
+
+  --f7-theme-color: var(--custom-accent-color);
+  --f7-page-bg-color: black;
+
+  --f7-button-fill-bg-color: hwb(from var(--custom-accent-color) h w b / 0.8);
+  --f7-button-fill-hover-bg-color: var(--custom-accent-color);
+  --f7-button-hover-bg-color: var(--custom-accent-color);
+  /*--f7-touch-ripple-color: var(--custom-accent-color);*/
+  --f7-button-pressed-bg-color: var(--custom-accent-color);
+  --f7-button-font-size: var(--custom-default-font-size);
+
+  /*--f7-popup-tablet-width: 829px;
+  --f7-popup-tablet-height: 700px;*/
+
+  --f7-card-bg-color: #1c1c1d;
+  --f7-card-margin-vertical: 5px;
+  --f7-card-header-min-height: auto;
+  --f7-card-header-padding-vertical: 0;
+  --f7-card-header-border-color: transparent !important;
+
+  /*--f7-list-item-padding-horizontal: 0 !important;*/
+  --custom-default-font-size: 16px; /*var(--f7-card-header-font-size);*/
+  --custom-default-button-height: 40px;
+}
+
+@media (width > 768px) {
+  :root {
+    --custom-default-font-size: 19px;
+    --custom-default-button-height: 60px;
+
+    /* Tablet Dashboard */
+    --custom-legend-font-size: 16px; /*var(--f7-card-header-font-size);*/
+    --custom-welcome-head-font-size: 40px;
+    --custom-welcome-info-font-size: 36px;
+    --custom-sensor-main-font-size: 40px; /*32px;*/
+    --custom-sensor-sub-font-size: 22px;
+    --custom-sensor-suffix-font-size: 13px;
+    --custom-widget-padding: 8px;
+  }
+}
+
+body {
+  font-size: var(--custom-default-font-size);
+  font-weight: 200;
+}
+
+.navbar a {
+  color: var(--custom-default-color);
+}
+
+/********** CARD HEADER ****************/
+/* Default Cards (incl. Tablet) */
+.card-header {
+  font-size: var(--custom-default-font-size);
+  font-weight: 200;
+  color: var(--custom-default-color);
+  opacity: 0.8;
+}
+
+/* APP Cards */
+.custom-card.card {
+  padding: 0;
+  background-color: transparent;
+}
+.custom-card.card .card-header {
+  font-size: 19px;
+  /*color: var(--custom-accent-color);*/
+  font-weight: 350;
+  /*border-bottom: 1px solid #888888;*/
+  /*padding-bottom: 5px;*/
+  padding: 20px 16px 0px 16px;
+  opacity: 1.0;
+}
+
+/* Tablet */
+@media (width > 768px) {
+  .custom-card.card .card-header {
+    font-size: 23px;
+    color: var(--custom-default-color);
+    font-weight: 200;
+  }
+}
+
+/********** LISTS ****************/
+.custom-card.card > ul {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.custom-card.card > ul > li {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 100%;
+  padding: 5px var(--f7-list-item-padding-horizontal);
+  box-sizing: border-box;
+  min-height: 55px;
+}
+
+.custom-card.card > ul > li {
+  font-size: var(--custom-default-font-size);
+  font-weight: 300;
+  color: var(--custom-default-color);
+  max-width: 100%;
+  column-gap: 5px;
+}
+
+@media (width > 768px) {
+  .custom-card.card {
+    background-color: var(--f7-card-bg-color);
+  }
+  .custom-card.card > ul > li {
+    min-height: 70px;
+  }
+}
+
+/********** UI GENERIC ****************/
+.custom-card li img {
+  padding-right: 11px;
+}
+.custom-card li div.name {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: auto;
+  flex-grow: 1;
+  color: var(--custom-default-color);
+}
+.custom-card li div.value {
+  white-space: nowrap;
+  color: var(--custom-value-color);
+}
+
+/*li.navigation-link .value::after {
+  content: '˃';
+  color: var(--custom-default-color);
+  margin-left: 10px;
+}*/
+
+li.popup-link .value::after {
+  content: '▼';
+  color: var(--custom-default-color);
+  margin-left: 10px;
+}
+
+/********** UI TOGGLE ****************/
+/* Button effects */
+.ripple-wave {
+  background-color: var(--custom-accent-color);
+}
+li.toggle .ripple-wave {
+  background-color: transparent !important;
+}
+
+/*.button:not(.active-state):not(.no-hover):hover {*/
+.button {
+  font-weight: normal;
+  color: var(--custom-default-color);
+}
+
+.button:hover {
+  color: var(--custom-default-color);
+}
+
+li.toggle {
+  overflow: hidden;
+  border-radius: 0; /* fix to avoid conflicks with real toggle button */
+}
+li.toggle label.toggle {
+  border: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  padding: 7px;
+  width: fit-content;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--custom-accent-color);
+  height: 33px !important;
+
+  background-color: hwb(from var(--custom-accent-color) h w b / 0.3);
+}
+li.toggle label.toggle.button-active {
+  background-color: hwb(from var(--custom-accent-color) h w b / 0.8);
+}
+
+li.toggle label.toggle .toggle-icon {
+  background-color: transparent !important;
+  height: 16px !important;
+}
+li.toggle label.toggle .toggle-icon::after {
+  background-color: var(--custom-accent-color);
+  top: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+li.toggle label.toggle.button-active .toggle-icon::after {
+  background-color: var(--custom-default-color) !important;
+  height: 22px !important;
+  width: 22px !important;
+  top: -3px !important;
+}
+
+/*@media (width > 768px) {
+  .selection .button,
+  .switch .button {
+    height: 40px !important;
+  }
+}*/
+
+/********** UI SELECTION ****************/
+/*li.selection {
+  overflow: hidden;
+}*/
+
+li.selection .value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: var(--custom-default-button-height) !important;
+  border-radius: calc(var(--custom-default-button-height) / 2);
+  border: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  padding-left: calc(var(--custom-default-button-height) / 4);
+}
+
+/*.custom-card.card > ul > li .button i.icon.color-gray {
+  color: var(--custom-default-color);
+}
+
+.custom-card.card > ul > li .button i.icon.color-red {
+  color: var(--custom-red);
+}*/
+
+/********** UI SETPPOINT ****************/
+li.setpoint .item-after > div {
+  height: var(--custom-default-button-height) !important;
+  text-align: right;
+}
+li.setpoint .stepper > div {
+  height: var(--custom-default-button-height) !important;
+  min-width: calc(var(--custom-default-button-height) + 5px) !important;
+  box-sizing:border-box;
+  border-radius: 0;
+  border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-top: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-bottom: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-right: none;
+  color: var(--custom-default-color);
+}
+li.setpoint .stepper > div::before,
+li.setpoint .stepper > div::after {
+  background-color: var(--custom-default-color);
+}
+li.setpoint .stepper > div:not(.stepper-value):hover {
+  background-color: var(--custom-accent-color) !important;
+  color: var(--custom-default-color);
+}
+li.setpoint .stepper > div:not(.stepper-value):hover::before,
+li.setpoint .stepper > div:not(.stepper-value):hover::after {
+  background-color: var(--custom-default-color);
+}
+li.setpoint .stepper > div:first-child {
+  border-radius: calc(var(--custom-default-button-height) / 2) 0 0 calc(var(--custom-default-button-height) / 2);
+  border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+li.setpoint .stepper > div:last-child {
+  border-radius: 0 calc(var(--custom-default-button-height) / 2) calc(var(--custom-default-button-height) / 2) 0;
+  border-right: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+
+/********** UI DIMMER ****************/
+li.dimmer .range-slider {
+  margin-right: 1px;
+  padding: 0;
+}
+
+/********** UI BUTTONS ****************/
+li.switch .value {
+  display: flex;
+}
+li.switch .value .button {
+  height: var(--custom-default-button-height) !important;
+  border-radius: 0;
+  border-top: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-bottom: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+li.switch .value .button.button-active {
+  border-color: var(--custom-accent-color-dark);
+}
+li.switch .value .button:first-child {
+  border-radius: calc(var(--custom-default-button-height) / 2) 0 0 calc(var(--custom-default-button-height) / 2);
+  border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+li.switch .value .button:last-child {
+  border-radius: 0 calc(var(--custom-default-button-height) / 2) calc(var(--custom-default-button-height) / 2) 0;
+  border-right: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+
+/********** UI ROLLERSHUTTER ****************/
+li.rollershutter .segmented {
+  margin-top: -1px;
+  padding: 0;
+}
+li.rollershutter .segmented .button {
+  height: var(--custom-default-button-height) !important;
+  min-width: calc(var(--custom-default-button-height) + 5px) !important;
+  box-sizing:border-box;
+  border-radius: 0;
+  border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-top: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-bottom: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  border-right: none;
+  color: var(--custom-default-color);
+}
+
+li.rollershutter .segmented .button:hover {
+  background-color: var(--custom-accent-color) !important;
+  color: var(--custom-default-color);
+}
+li.rollershutter .segmented .button:hover i.color-gray {
+  color: var(--custom-default-color);
+}
+
+li.rollershutter .segmented .button:first-child {
+  border-radius: calc(var(--custom-default-button-height) / 2) 0 0 calc(var(--custom-default-button-height) / 2);
+  border-left: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+
+li.rollershutter .segmented .button:nth-child(3) {
+  border-radius: 0 calc(var(--custom-default-button-height) / 2) calc(var(--custom-default-button-height) / 2) 0;
+  border-right: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+}
+
+/********** UI TEXT ****************/
+li.text.link {
+  overflow: hidden; /* limit ripple effect to the container */
+}
+li.text .icon::after {
+  font-size: var(--custom-default-font-size);
+  color: var(--custom-default-color) !important;
+}
+li.text .value {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+li.text .value .icon {
+  margin-bottom: -3px;
+}
+
+/********** UI INPUT ****************/
+li.input.input-focused::after {
+  background: none !important;
+}
+li.input .oh-input .input  {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  height: var(--custom-default-button-height) !important;
+  border-radius: 5px;
+  border: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
+  padding: 0;
+}
+
+li.input .oh-input .input input {
+  text-align: right;
+  padding: 5px;
+}
+
+
+
+
+
+
+
+
+
+
+
+/**************************************/
+.custom-card.card > ul > li.rollershutter .rollershutter-controls {
+  background-color: transparent;
+  border-radius: 0;
+}
+
+.colorPopup,
+.selectionPopup {
+    border-radius: 10px !important;
+    margin: 10px !important;
+}
+.colorPopup .page,
+.colorPopup .page .card,
+.selectionPopup .page {
+    background-color: gray !important;
+}
+
+.selectionPopup .page .button .item-title {
+    color: white !important;
+}
+
+.selectionPopup ul {
+  margin: 0;
+  padding: 10px;
+}
+.selectionPopup ul .button {
+  font-size: var(--f7-button-font-size);
+  font-weight: 350;
+}
+.selectionPopup ul > li {
+  display: flex;
+  margin-bottom: 5px;
+}
+.selectionPopup ul > li.active,
+.selectionPopup ul > li:hover {
+  background-color: var(--f7-button-fill-hover-bg-color);
+}
+.selectionPopup ul > li a {
+  width: 100%;
+  text-align: right;
+  color: var(--f7-button-text-color);
+}
+
+.selectionPopup,
+.colorPopup {
+    position: absolute;
+    min-width: auto !important;
+    height: fit-content !important;
+    left: 50%;
+    top: 50%;
+    margin-top: -20% !important;
+    margin-bottom: -20% !important;
+}
+
+@media (width > 768px) {
+  li.rollershutter .button {
+    width: 56px !important;
+    height: 60px !important;
+  }
+  li.rollershutter .button i.icon {
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 35px !important;
+  }
+
+}
+/*
+ * .targetPopup {
+    max-height: 90%;
+    width: 100% !important;
+    top: auto !important;
+    bottom: 0;
+    overflow-y: auto;
+}
+.selectionPopup,
+.colorPopup {
+    max-height: 100%;
+    min-width: 100% !important;
+    box-sizing: border-box;
+    top: auto !important;
+    bottom: 0;
+}
+@media (width > 768px) {
+  .targetPopup {
+      max-height: 768px !important;
+      max-width: 1024px !important;
+      top: 0 !important;
+  }
+  .targetPopup.halfSize {
+      max-width: 512px !important;
+      top: 0 !important;
+  }
+  /*.selectionPopup,
+  .colorPopup {
+      top: 0 !important;
+      min-width: auto !important;
+  }
+*/
+
+.view .page,
+.popup .page {
+    container-type: inline-size;
+}
+@media (width <= 768px) {
+  .view .page-content > div > div.block > div.oh-col > div.block,
+  .popup .page-content > div.block {
+      padding: 0 !important;
+      margin: 0 !important;
+  }
+  .card.oh-card {
+      margin: 0;
+      border-radius: 0;
+  }
+}
+@media (width > 768px) {
+  .page .block {
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      display: flex;
+  }
+  .col-100.medium-50 {
+      width: 50%;
+  }
+  .col-100.medium-100 {
+      width: 100%;
+  }
+  .col-100.medium-100 > .custom-card.card ul {
+    column-gap: calc(var(--f7-card-margin-horizontal) * 2);
+  }
+  .col-100.medium-100 > .custom-card.card li {
+    box-sizing: border-box;
+    flex: 0 0 calc(50% - var(--f7-card-margin-horizontal));
+    overflow: hidden;
+  }
+}

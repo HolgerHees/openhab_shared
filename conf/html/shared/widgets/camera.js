@@ -56,25 +56,20 @@ var mvCamera = (function( ret ) {
           containerElement.classList.add("cameraPopup");
           containerElement.style.inset = containerElement.dataset.inset;
 
+          videoElement = states[key]['video'] = document.createElement("video");
+          videoElement.setAttribute("style", "display:none;max-height:100%;max-width:100%;width:100%;height:100%;object-fit:contain;");
+          containerElement.appendChild(videoElement);
+          videoElement.addEventListener("loadeddata", function() {
+              if( !isFullscreen ) return;
+              videoElement.style.display="";
+              imageElement.style.display="none";
+          });
+          states[key]['handler'] = mvVideo.build(videoElement, states[key]['streamUrl']);
+
           window.setTimeout(function(){
               containerElement.style.inset = "0 0 0 0";
               containerElement.style.backgroundColor = "rgba(0,0,0,0.9)";
           },50);
-
-          videoElement = states[key]['video'] = document.createElement("video");
-          videoElement.setAttribute("style", "display:none;max-height:100%;max-width:100%;width:100%;height:100%;object-fit:contain;");
-          containerElement.appendChild(videoElement);
-          window.setTimeout(function(){
-              if( !isFullscreen ) return;
-              videoElement.addEventListener("loadeddata", function() {
-                  if( !isFullscreen ) return;
-                  videoElement.style.display="";
-                  imageElement.style.display="none";
-              });
-              states[key]['handler'] = mvVideo.build(videoElement, states[key]['streamUrl']);
-          },0);
-
-          //videoElement.addEventListener("click",function(){togglePopup(key);});
         }
     }
 

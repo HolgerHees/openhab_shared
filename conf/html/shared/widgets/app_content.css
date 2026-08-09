@@ -1,0 +1,115 @@
+/* Modifier */
+.highlightModifier *,
+.highlightModifier {
+  font-weight: 350;
+}
+
+.lengendModifier *,
+.lengendModifier {
+  font-size: var(--custom-legend-font-size);
+}
+
+/* States */
+.errorState {
+  color: var(--custom-error-state);
+}
+.warnState {
+  color: var(--custom-warn-state);
+}
+.activeState {
+  color: var(--custom-active-state);
+}
+.normalState {
+  color: var(--custom-value-color);
+}
+.normalText {
+  color: var(--custom-default-color);
+}
+
+/* Sensor prefix and suffix */
+div.sensorCO2Modifier {
+}
+div.sensorTopModifier {
+  font-size: var(--custom-legend-font-size);
+  font-weight: 350;
+}
+div.sensorBottomModifier {
+  font-size: var(--custom-legend-font-size);
+  transform: translate(-2px, 0) scale(0.9);
+  opacity: 0.7;
+}
+div.sensorInfo {
+  color: var(--custom-default-color);
+  opacity: 0.7;
+}
+div.sensorPrefix {
+  color: var(--custom-default-color);
+  vertical-align: text-top;
+  opacity: 0.7;
+  font-weight: 200 !important;
+  padding-right: 5px;
+}
+div.sensorMain {
+  color: var(--custom-value-color);
+  font-size: var(--custom-sensor-main-font-size);
+  font-weight: 350;
+}
+div.sensorSub {
+  color: var(--custom-value-color);
+  font-size: var(--custom-sensor-sub-font-size);
+  font-weight: 300;
+}
+div.sensorPercentSuffix::after,
+div.sensorEnergySuffix::after,
+div.sensorCO2Suffix::after,
+div.sensorTemperatureSuffix::after,
+div.sensorHumiditySuffix::after,
+div.sensorMillimeterSuffix::after,
+div.sensorSpeedSuffix::after {
+  font-size: var(--custom-sensor-suffix-font-size);
+  vertical-align: text-top;
+  opacity: 0.7;
+  font-weight: 200;
+}
+div.sensorEnergySuffix::after {
+  content: " kW";
+}
+div.sensorCO2Suffix::after {
+  content: " ppm";
+}
+div.sensorTemperatureSuffix::after {
+  content: " °C";
+}
+div.sensorPercentSuffix::after,
+div.sensorHumiditySuffix::after {
+  content: " %";
+}
+div.sensorMillimeterSuffix::after {
+  content: " mm";
+}
+div.sensorSpeedSuffix::after {
+  content: " km/h";
+}
+
+/* Floorplan */
+div.circuiteActive {
+  color: var(--custom-green);
+}
+svg.floor_outdoor_lights .lightAuto {
+}
+svg.floor_outdoor_lights .lightActive,
+svg.floor_actions .lightActive {
+  fill: var(--custom-yellow-dark);
+}
+svg.floor_outdoor_lights .lightDisabled {
+  fill: var(--custom-red-dark);
+}
+svg.floor_actions .shutterAvailable.shutterDown {
+  fill: var(--custom-green-dark);
+}
+.shutterDownAdvise svg.floor_actions .shutterAvailable {
+  fill: #ffa500;
+}
+svg.floor_actions .contactOpen {
+  fill: var(--custom-red-dark);
+}
