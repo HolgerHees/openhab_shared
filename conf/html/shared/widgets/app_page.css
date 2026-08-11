@@ -80,7 +80,6 @@ body {
 /* APP Cards */
 .custom-card.card {
   padding: 0;
-  background-color: transparent;
 }
 .custom-card.card .card-header {
   font-size: 19px;
@@ -135,6 +134,10 @@ body {
   }
   .custom-card.card > ul > li {
     min-height: 70px;
+  }
+  .custom-card.card > ul > li > img {
+    height: 40px;
+    width: 40px;
   }
 }
 
@@ -292,6 +295,9 @@ li.setpoint .stepper > div:last-child {
   border-radius: 0 calc(var(--custom-default-button-height) / 2) calc(var(--custom-default-button-height) / 2) 0;
   border-right: 1px solid hwb(from var(--custom-accent-color) h w b / 0.6);
 }
+li.setpoint .stepper > div.stepper-value {
+  font-size: var(--custom-default-font-size);
+}
 
 /********** UI DIMMER ****************/
 li.dimmer .range-slider {
@@ -418,7 +424,7 @@ li.input .oh-input .input input {
 .colorPopup .page,
 .colorPopup .page .card,
 .selectionPopup .page {
-    background-color: gray !important;
+    background-color: #505050 !important;
 }
 
 .selectionPopup .page .button .item-title {
@@ -443,7 +449,7 @@ li.input .oh-input .input input {
 }
 .selectionPopup ul > li a {
   width: 100%;
-  text-align: right;
+  text-align: left;
   color: var(--f7-button-text-color);
 }
 
@@ -454,8 +460,7 @@ li.input .oh-input .input input {
     height: fit-content !important;
     left: 50%;
     top: 50%;
-    margin-top: -20% !important;
-    margin-bottom: -20% !important;
+    margin-top: -50% !important;
 }
 
 @media (width > 768px) {
@@ -507,29 +512,46 @@ li.input .oh-input .input input {
 .popup .page {
     container-type: inline-size;
 }
+.card.oh-card {
+    margin: 0;
+}
+/* Phone */
 @media (width <= 768px) {
+  .custom-card.card {
+    margin: 0 !important;
+    background-color: transparent !important;
+  }
   .view .page-content > div > div.block > div.oh-col > div.block,
   .popup .page-content > div.block {
       padding: 0 !important;
       margin: 0 !important;
   }
   .card.oh-card {
-      margin: 0;
       border-radius: 0;
   }
 }
+/* Tablet */
 @media (width > 768px) {
-  .page .block {
+  .custom-card.card {
+    /*margin-right: var(--f7-card-margin-horizontal);
+    margin-left: 0;*/
+    /*margin: 0;*/
+  }
+  .page .page-content > div > .block, /*page*/
+  .page .page-content > .block {      /*popup*/
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: flex-start;
       display: flex;
+      margin: var(--f7-card-margin-horizontal) !important;
+      gap: var(--f7-card-margin-horizontal) !important;
   }
   .col-100.medium-50 {
-      width: 50%;
+      /*width: 50%;*/
+      flex: calc(50% - (var(--f7-card-margin-horizontal) / 2));
   }
   .col-100.medium-100 {
-      width: 100%;
+      flex: 100%;
   }
   .col-100.medium-100 > .custom-card.card ul {
     column-gap: calc(var(--f7-card-margin-horizontal) * 2);
