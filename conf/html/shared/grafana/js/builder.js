@@ -16,9 +16,7 @@ var SUBSCRIPTION_URL = "/rest/events?topics=openhab/items/*/statechanged";
 var REST_URL = "/rest/items/";
 
 var SMARTHOME_GRAFANA_DEFAULTS = {
-    // library
-    debug: "false",
-    refresh: "0",
+    refresh: "30",
     // ESH sitemap
     sitemap: "default",
     // Grafana URL
@@ -201,14 +199,6 @@ function GrafanaPanel(params)
     let frame = resolveParam(params, "frame");
     let urlPrefix = resolveParam(params, "urlPrefix");
     let panelPath = resolveParam(params, "panelPath");
-    let libVars = {
-        debug: {
-            value: resolveParam(params, "debug")
-        },
-        refresh: {
-            value: resolveParam(params, "refresh")
-        }
-    };
     let urlVars = {
         dashboard: {
             value: resolveParam(params, "dashboard")
@@ -220,6 +210,10 @@ function GrafanaPanel(params)
         to: {
             key: "to",
             value: resolveParam(params, "to")
+        },
+        refresh: {
+            key: "refresh",
+            value: resolveParam(params, "refresh")
         },
         panel: {
             key: "panelId",
@@ -233,9 +227,6 @@ function GrafanaPanel(params)
 
     function updateFrameSourceURL() 
     {
-        var debug = libVars.debug.value;
-        var refresh = libVars.refresh.value;
-
         var iframe = document.getElementById(frame);
 
         var url = urlPrefix;
